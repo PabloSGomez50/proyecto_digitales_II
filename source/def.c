@@ -1,6 +1,24 @@
 #include "def.h"
 
-void delay_mseg(int time) {
+
+volatile uint32_t flag_tick_delay = 0;
+volatile uint32_t flag_tick_boton = 0;
+
+void init_systick(uint16_t div) {
+	(void) SysTick_Config(SystemCoreClock/div);
+}
+
+void SystickHandler(void) {
+  flag_tick_boton++;
+  flag_tick_delay++;
+} 
+
+void delay_mseg(uint16_t msegs) {
+  uint32_t finish_time = flag_tick_delay + msegs;
+  uint8_t i = 0;
+  while(finish_time > flag_tick_delay){
+    i++;
+  }
 
 }
 
@@ -48,4 +66,116 @@ void request_i2c_data(uint16_t I2C_Addr, uint16_t register_addr, uint8_t * data,
         r = I2C_MasterStop(I2C1);
       }
     }
+}
+
+/*
+ * Lectura de botones
+ * Se implementa un sistema antirrebote en la función
+ */
+
+void lectura_boton (uint8_t puerto, uint8_t boton, estado_boton_t *estado){
+	uint8_t lectura = GPIO_PinRead (GPIO, puerto, boton);
+
+	switch (*estado){
+		case soltado:
+			if (lectura == 0){
+				*estado = pulsado_antirrebote;
+				flag_tick_boton = 0;
+			}
+			break;
+		case pulsado_antirrebote:
+			if (flag_tick_boton >= TIEMPO_ANTIRREBOTE){
+				if (lectura == 0) *estado = pulsado;
+				else *estado = soltado;
+			}
+			break;
+		case pulsado:
+			if (lectura == 1){
+				*estado = soltado_antirrebote;
+				flag_tick_boton = 0;
+			}
+			break;
+		case soltado_antirrebote:
+			if (flag_tick_boton >= TIEMPO_ANTIRREBOTE){
+				if (lectura == 1) *estado = soltado;
+				else *estado = pulsado;
+			}
+			break;
+	}
+}
+
+
+/*
+ * Inicialización USART
+ * Se configura el puerto USART y se activa la interrupción
+ */
+void init_SWM_USART(uint8_t port, uint8_t rx, uint8_t tx) {
+	USART_Type * p_port;
+	uint8_t p_tx;
+	uint8_t p_rx;
+  uint16_t p_clock;
+  uint8_t p_nvic;
+	switch(port) {
+		case 0:
+      p_port = USART0;
+			p_clock = kUART0_Clk_From_MainClk;
+			p_nvic = USART0_IRQn;
+			p_tx = kSWM_USART0_TXD;
+			p_rx = kSWM_USART0_RXD;
+			break;
+		case 1:
+      p_port = USART1;
+			p_clock = kUART1_Clk_From_MainClk;
+			p_nvic = USART1_IRQn;
+			p_tx = kSWM_USART1_TXD;
+			p_rx = kSWM_USART1_RXD;
+			break;
+		case 2:
+      p_port = USART2;
+			p_clock = kUART2_Clk_From_MainClk;
+			p_nvic = USART2_IRQn;
+			p_tx = kSWM_USART2_TXD;
+			p_rx = kSWM_USART2_RXD;
+			break;
+		case 3:
+      p_port = USART3;
+			p_clock = kUART3_Clk_From_MainClk;
+			p_nvic = PIN_INT6_USART3_IRQn;
+			p_tx = kSWM_USART3_TXD;
+			p_rx = kSWM_USART3_RXD;
+			break;
+		case 4:
+      p_port = USART4;
+			p_clock = kUART4_Clk_From_MainClk;
+			p_nvic = PIN_INT7_USART4_IRQn;
+			p_tx = kSWM_USART4_TXD;
+			p_rx = kSWM_USART4_RXD;
+			break;
+		default:
+      p_port = USART1;
+			p_clock = kUART1_Clk_From_MainClk;
+			p_nvic = USART1_IRQn;
+			p_tx = kSWM_USART1_TXD;
+			p_rx = kSWM_USART1_RXD;
+			break;
+	}
+	CLOCK_EnableClock (kCLOCK_Swm);
+
+	SWM_SetMovablePinSelect(SWM0, p_tx, tx);
+	SWM_SetMovablePinSelect(SWM0, p_rx, rx);
+
+	CLOCK_DisableClock(kCLOCK_Swm);
+
+  // Setup config for usart - Corregir esos puntos  
+	usart_config_t config;
+
+	CLOCK_Select(p_clock);
+
+	USART_GetDefaultConfig(&config);
+	config.enableRx     = true;
+	config.enableTx     = true;
+	USART_Init(p_port, &config, CLOCK_GetFreq(kCLOCK_MainClk));
+
+	USART_EnableInterrupts(p_port, kUSART_RxReadyInterruptEnable);
+  NVIC_EnableIRQ(p_nvic);
 }

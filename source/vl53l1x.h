@@ -9,7 +9,7 @@
 typedef enum {
     short_distance = 1,
     long_distance = 2,
-}laser_dist_mode;
+} laser_dist_mode;
 
 struct laser_data_t {
     uint8_t ready;

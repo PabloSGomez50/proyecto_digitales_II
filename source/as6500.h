@@ -4,6 +4,11 @@
 
 extern uint8_t magnet_status, md, ml, mh;
 
-extern uint8_t x[3];
+extern uint8_t buffer_as6500[3];
 
-void get_magnet_status(void);
+// Direction polarity (GND = values increase clockwise,
+// VDD = values increase counterclockwise)
+
+void refresh_magnet_status(void);
+
+uint16_t get_angle_position();
