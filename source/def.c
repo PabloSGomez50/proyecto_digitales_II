@@ -3,23 +3,38 @@
 
 volatile uint32_t flag_tick_delay = 0;
 volatile uint32_t flag_tick_boton = 0;
+volatile uint32_t flag_tick_usart = 0;
+volatile uint32_t ref_tick;
+
+uint8_t buffer_usart[usart_size] = "";
+uint8_t msg_usart[usart_size] = "";
+uint8_t index_usart = 0;
+
 
 void init_systick(uint16_t div) {
 	(void) SysTick_Config(SystemCoreClock/div);
 }
 
-void SystickHandler(void) {
-  flag_tick_boton++;
-  flag_tick_delay++;
-} 
 
-void delay_mseg(uint16_t msegs) {
-  uint32_t finish_time = flag_tick_delay + msegs;
-  uint8_t i = 0;
-  while(finish_time > flag_tick_delay){
-    i++;
-  }
+void SysTick_Handler(void)
+{
+	if (flag_tick_delay >= 4294900000)
+		flag_tick_delay = 0;
+	flag_tick_delay++;
+	flag_tick_usart++;
+}
 
+void USART0_IRQHandler(void) {
+	flag_tick_usart = 0;
+	if (index_usart < usart_size) {
+		buffer_usart[index_usart] = USART_ReadByte(USART0);
+	}
+	index_usart++;
+}
+
+void delay_mseg(uint16_t mseg){
+	ref_tick = flag_tick_delay + mseg;
+	while(flag_tick_delay <= ref_tick);
 }
 
 void init_i2c1(uint8_t pin_scl, uint8_t pin_sda, uint32_t baudRate, uint32_t frecuency) {
@@ -109,54 +124,55 @@ void lectura_boton (uint8_t puerto, uint8_t boton, estado_boton_t *estado){
  * Inicialización USART
  * Se configura el puerto USART y se activa la interrupción
  */
-void init_SWM_USART(uint8_t port, uint8_t rx, uint8_t tx) {
+
+void init_SWM_USART(USART_Type * port, uint8_t rx, uint8_t tx) {
 	USART_Type * p_port;
 	uint8_t p_tx;
 	uint8_t p_rx;
-  uint16_t p_clock;
-  uint8_t p_nvic;
-	switch(port) {
-		case 0:
-      p_port = USART0;
+	uint16_t p_clock;
+	uint8_t p_nvic;
+	switch((uintptr_t) port) {
+		case USART0_BASE:
+			p_port = USART0;
 			p_clock = kUART0_Clk_From_MainClk;
 			p_nvic = USART0_IRQn;
 			p_tx = kSWM_USART0_TXD;
 			p_rx = kSWM_USART0_RXD;
 			break;
-		case 1:
-      p_port = USART1;
+		case USART1_BASE:
+			p_port = USART1;
 			p_clock = kUART1_Clk_From_MainClk;
 			p_nvic = USART1_IRQn;
 			p_tx = kSWM_USART1_TXD;
 			p_rx = kSWM_USART1_RXD;
 			break;
-		case 2:
-      p_port = USART2;
+		case USART2_BASE:
+      		p_port = USART2;
 			p_clock = kUART2_Clk_From_MainClk;
 			p_nvic = USART2_IRQn;
 			p_tx = kSWM_USART2_TXD;
 			p_rx = kSWM_USART2_RXD;
 			break;
-		case 3:
-      p_port = USART3;
+		case USART3_BASE:
+      		p_port = USART3;
 			p_clock = kUART3_Clk_From_MainClk;
 			p_nvic = PIN_INT6_USART3_IRQn;
 			p_tx = kSWM_USART3_TXD;
 			p_rx = kSWM_USART3_RXD;
 			break;
-		case 4:
-      p_port = USART4;
+		case USART4_BASE:
+      		p_port = USART4;
 			p_clock = kUART4_Clk_From_MainClk;
 			p_nvic = PIN_INT7_USART4_IRQn;
 			p_tx = kSWM_USART4_TXD;
 			p_rx = kSWM_USART4_RXD;
 			break;
 		default:
-      p_port = USART1;
-			p_clock = kUART1_Clk_From_MainClk;
-			p_nvic = USART1_IRQn;
-			p_tx = kSWM_USART1_TXD;
-			p_rx = kSWM_USART1_RXD;
+			p_port = USART0;
+			p_clock = kUART0_Clk_From_MainClk;
+			p_nvic = USART0_IRQn;
+			p_tx = kSWM_USART0_TXD;
+			p_rx = kSWM_USART0_RXD;
 			break;
 	}
 	CLOCK_EnableClock (kCLOCK_Swm);
@@ -177,5 +193,5 @@ void init_SWM_USART(uint8_t port, uint8_t rx, uint8_t tx) {
 	USART_Init(p_port, &config, CLOCK_GetFreq(kCLOCK_MainClk));
 
 	USART_EnableInterrupts(p_port, kUSART_RxReadyInterruptEnable);
-  NVIC_EnableIRQ(p_nvic);
+	NVIC_EnableIRQ(p_nvic);
 }

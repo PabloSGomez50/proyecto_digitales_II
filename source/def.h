@@ -35,14 +35,23 @@ extern uint32_t frecuency;
 extern volatile uint32_t flag_tick_delay;
 extern volatile uint32_t flag_tick_boton;
 
+
+#define usart_size 128
+extern uint8_t buffer_usart[usart_size];
+extern uint8_t msg_usart[usart_size];
+extern uint8_t index_usart;
+
+void SysTick_Handler(void);
+void USART0_IRQHandler(void);
+
 void init_systick(uint16_t div);
-void delay_mseg(uint16_t msegs);
+void delay_mseg(uint16_t mseg);
 
 void init_i2c1(uint8_t pin_scl, uint8_t pin_sda, uint32_t baudRate, uint32_t frecuency);
 
 void request_i2c_data(uint16_t I2C_Addr, uint16_t register_addr, uint8_t * data, uint8_t size);
 
 
-void init_SWM_USART(uint8_t port, uint8_t rx, uint8_t tx);
+void init_SWM_USART(USART_Type * port, uint8_t rx, uint8_t tx);
 
 #endif

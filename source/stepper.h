@@ -12,13 +12,14 @@
 #define MOT_ANGLE_PER_STEP 15
 
 struct step_seq_t {
-    uint8_t mot_a1;
-    uint8_t mot_a2;
-    uint8_t mot_b1;
-    uint8_t mot_b2;
+    uint8_t mot_a1 : 1;
+    uint8_t mot_a2 : 1;
+    uint8_t mot_b1 : 1;
+    uint8_t mot_b2 : 1;
 };
 
 extern struct step_seq_t sequence_full_steps[8];
+extern struct step_seq_t sequence_half_steps[4];
 
 void init_stepper();
 void make_step(uint8_t step_state);

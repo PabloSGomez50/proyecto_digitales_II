@@ -1,6 +1,22 @@
 #include "stepper.h"
+// https://i.sstatic.net/nyeOe.gif
+struct step_seq_t sequence_full_steps[8] = {
+    {1, 0, 0, 1},
+    {1, 1, 0, 0},
+    {0, 1, 1, 0},
+    {0, 0, 1, 1},
+    {1, 0, 0, 1},
+    {1, 1, 0, 0},
+    {0, 1, 1, 0},
+    {0, 0, 1, 1}
+};
 
-struct step_seq_t sequence_full_steps[8];
+struct step_seq_t sequence_half_steps[4] = {
+    {1,0,0,0},
+    {1,1,0,0},
+    {0,1,0,0},
+    {0,1,1,0}
+};
 
 void init_stepper() {
     gpio_pin_config_t out_config = {kGPIO_DigitalOutput, 0};
