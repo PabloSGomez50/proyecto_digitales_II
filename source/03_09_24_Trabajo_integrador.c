@@ -25,22 +25,30 @@ int main(void) {
     // Variables del vl53l1x
     struct laser_data_t lidar_data;
     uint16_t buffer_dist[10] = {0};
-    laser_dist_mode lidar_mode = short_distance;
+    laser_dist_mode lidar_mode = long_distance;
 
     // Variables del as6500
     uint16_t magnetic_angle = 0;
     uint16_t mot_angle = 0;
 
-
-    // Vars steppera
+    // Vars stepper
     uint8_t current_step = 0;
 
   	/* Init board hardware. */
     BOARD_InitBootPins();
     BOARD_BootClockFRO18M();
     BOARD_InitDebugConsole();
+
+    init_gpio();
     init_systick(1000);
+
+    init_bipolar_stepper();
+    select_micro_steps(full_step);
+
+    // test_stepper();
+    // Rx: 17   | Tx: 16
     init_SWM_USART(usart_port, kSWM_PortPin_P0_17, kSWM_PortPin_P0_16);
+    // SCL: 18  | SDA: 19
     init_i2c1(kSWM_PortPin_P0_18, kSWM_PortPin_P0_19, baud, frecuency);
     init_vl53l1x(dev, lidar_mode);
     mot_angle = get_angle_position();
@@ -48,14 +56,15 @@ int main(void) {
     sprintf(msg_usart, "El valor del angulo es %i\n", mot_angle);
     USART_WriteBlocking(usart_port, msg_usart, strlen(msg_usart) - 1);
 
-    // init_stepper();
-
     while(1) {
 
       lidar_data = get_data_laser(dev);
       refresh_magnet_status();
       if (md & !ml & !mh) {
         magnetic_angle = get_angle_position();
+        
+        sprintf(msg_usart, "El valor del angulo es %i\n", magnetic_angle);
+        USART_WriteBlocking(usart_port, msg_usart, strlen(msg_usart) - 1);
       } else {
         PRINTF("Error en la lectura del iman:\nMD: %d\tML: %d\t MH: %d\n", md, ml, mh);
       }

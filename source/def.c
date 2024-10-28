@@ -9,6 +9,8 @@ volatile uint32_t ref_tick;
 uint8_t buffer_usart[usart_size] = "";
 uint8_t msg_usart[usart_size] = "";
 uint8_t index_usart = 0;
+gpio_pin_config_t out_config = {kGPIO_DigitalOutput, 0};
+gpio_pin_config_t in_config = {kGPIO_DigitalInput};
 
 
 void init_systick(uint16_t div) {
@@ -30,6 +32,18 @@ void USART0_IRQHandler(void) {
 		buffer_usart[index_usart] = USART_ReadByte(USART0);
 	}
 	index_usart++;
+}
+
+// Normal functions
+void init_gpio(void) {
+	
+    GPIO_PortInit(GPIO, 0);
+    GPIO_PortInit(GPIO, 1);
+    GPIO_PinInit(GPIO, 1, RED_PIN, &out_config);
+    GPIO_PinInit(GPIO, 1, GREEN_PIN, &out_config);
+    GPIO_PinInit(GPIO, 1, BLUE_PIN, &out_config);
+    GPIO_PinInit(GPIO, 0, USR_BTN, &in_config);
+    GPIO_PinInit(GPIO, 0, ISP_BTN, &in_config);
 }
 
 void delay_mseg(uint16_t mseg){

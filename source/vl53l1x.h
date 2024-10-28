@@ -1,7 +1,7 @@
 #include "VL53L1X_api.h"
 #include "def.h"
 
-#define MEASUREMENT_BUDGET_MS 50
+#define MEASUREMENT_BUDGET_MS       50
 #define INTER_MEASUREMENT_PERIOD_MS 55
 #define VL53L1X_ADDRESS	 			0x52
  /* 1=short, 2=long */

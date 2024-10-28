@@ -20,6 +20,11 @@
 
 
 #define TIEMPO_ANTIRREBOTE 40
+#define USR_BTN 4
+#define ISP_BTN 12
+#define RED_PIN 2
+#define GREEN_PIN 0
+#define BLUE_PIN 1
 
 typedef enum {
 	soltado = 0,
@@ -41,12 +46,18 @@ extern uint8_t buffer_usart[usart_size];
 extern uint8_t msg_usart[usart_size];
 extern uint8_t index_usart;
 
+extern gpio_pin_config_t out_config;
+extern gpio_pin_config_t in_config;
+
+
 void SysTick_Handler(void);
 void USART0_IRQHandler(void);
 
 void init_systick(uint16_t div);
 void delay_mseg(uint16_t mseg);
 
+void init_gpio(void);
+void lectura_boton (uint8_t puerto, uint8_t boton, estado_boton_t *estado);
 void init_i2c1(uint8_t pin_scl, uint8_t pin_sda, uint32_t baudRate, uint32_t frecuency);
 
 void request_i2c_data(uint16_t I2C_Addr, uint16_t register_addr, uint8_t * data, uint8_t size);
