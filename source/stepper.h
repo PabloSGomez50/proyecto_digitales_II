@@ -43,8 +43,12 @@ extern struct step_seq_t sequence_full_steps[8];
 extern struct step_seq_t sequence_half_steps[4];
 
 void init_unipolar_stepper();
-void init_bipolar_stepper();
+void init_bipolar_stepper(direction_t dir);
+
 void test_unipolar_stepper();
+
 void make_unipolar_step(uint8_t step_state);
+
+void select_micro_steps(microstep_t option);
 void set_bipolar_direction(direction_t dir);
 void make_bipolar_step(void);

@@ -14,6 +14,7 @@
 #include "stepper.h"
 
 #define usart_port USART2
+#define USR_DEBUG 0
 
 
 int main(void) {
@@ -33,16 +34,18 @@ int main(void) {
 
     // Vars stepper
     uint8_t current_step = 0;
+    direction_t stepper_dir = CW;
 
   	/* Init board hardware. */
     BOARD_InitBootPins();
     BOARD_BootClockFRO18M();
-    BOARD_InitDebugConsole();
+    if (USR_DEBUG)
+      BOARD_InitDebugConsole();
 
     init_gpio();
     init_systick(1000);
-
-    init_bipolar_stepper();
+    
+    init_bipolar_stepper(stepper_dir);
     select_micro_steps(full_step);
 
     // test_stepper();
@@ -51,16 +54,20 @@ int main(void) {
     // SCL: 18  | SDA: 19
     init_i2c1(kSWM_PortPin_P0_18, kSWM_PortPin_P0_19, baud, frecuency);
     init_vl53l1x(dev, lidar_mode);
-    mot_angle = get_angle_position();
-    // PRINTF("El valor del angulo es %i:", mot_angle);
-    sprintf(msg_usart, "El valor del angulo es %i\n", mot_angle);
-    USART_WriteBlocking(usart_port, msg_usart, strlen(msg_usart) - 1);
+
+
+    if (refresh_magnet_status()) {
+      mot_angle = get_angle_position();
+      if (USR_DEBUG)
+        PRINTF("El valor del angulo es %i:", mot_angle);
+      sprintf(msg_usart, "El valor del angulo es %i\n", mot_angle);
+      USART_WriteBlocking(usart_port, msg_usart, strlen(msg_usart) - 1);
+    }
 
     while(1) {
 
       lidar_data = get_data_laser(dev);
-      refresh_magnet_status();
-      if (md & !ml & !mh) {
+      if (refresh_magnet_status()) {
         magnetic_angle = get_angle_position();
         
         sprintf(msg_usart, "El valor del angulo es %i\n", magnetic_angle);
@@ -81,10 +88,9 @@ int main(void) {
       }
 
 
-
+      make_bipolar_step();
       current_step++;
-      // make_step(current_step);
       mot_angle += MOT_ANGLE_PER_STEP;
     }
-    return 0 ;
+    return 0;
 }

@@ -6,8 +6,8 @@ volatile uint32_t flag_tick_boton = 0;
 volatile uint32_t flag_tick_usart = 0;
 volatile uint32_t ref_tick;
 
-uint8_t buffer_usart[usart_size] = "";
-uint8_t msg_usart[usart_size] = "";
+uint8_t buffer_usart[USART_SIZE] = "";
+uint8_t msg_usart[USART_SIZE] = "";
 uint8_t index_usart = 0;
 gpio_pin_config_t out_config = {kGPIO_DigitalOutput, 0};
 gpio_pin_config_t in_config = {kGPIO_DigitalInput};
@@ -28,7 +28,7 @@ void SysTick_Handler(void)
 
 void USART0_IRQHandler(void) {
 	flag_tick_usart = 0;
-	if (index_usart < usart_size) {
+	if (index_usart < USART_SIZE) {
 		buffer_usart[index_usart] = USART_ReadByte(USART0);
 	}
 	index_usart++;

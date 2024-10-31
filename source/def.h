@@ -41,9 +41,9 @@ extern volatile uint32_t flag_tick_delay;
 extern volatile uint32_t flag_tick_boton;
 
 
-#define usart_size 128
-extern uint8_t buffer_usart[usart_size];
-extern uint8_t msg_usart[usart_size];
+#define USART_SIZE 128
+extern uint8_t buffer_usart[USART_SIZE];
+extern uint8_t msg_usart[USART_SIZE];
 extern uint8_t index_usart;
 
 extern gpio_pin_config_t out_config;
