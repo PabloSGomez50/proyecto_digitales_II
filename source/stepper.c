@@ -28,11 +28,12 @@ struct step_seq_t sequence_half_steps[4] = {
     {0,1,1,0}
 };
 
-void init_bipolar_stepper() {
+void init_bipolar_stepper(direction_t dir) {
     GPIO_PinInit(GPIO, MOT_PORT_DIR, MOT_PIN_DIR, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_MS1, MOT_PIN_MS1, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_MS2, MOT_PIN_MS2, &out_config);
+    set_bipolar_direction(dir);
 }
 
 void init_unipolar_stepper() {
