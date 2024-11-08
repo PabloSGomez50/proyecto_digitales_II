@@ -48,7 +48,8 @@ int main(void) {
     init_bipolar_stepper(stepper_dir);
     select_micro_steps(full_step);
 
-    // test_stepper();
+
+    test_bipolar_stepper();
     // Rx: 17   | Tx: 16
     init_SWM_USART(usart_port, kSWM_PortPin_P0_17, kSWM_PortPin_P0_16);
     // SCL: 18  | SDA: 19

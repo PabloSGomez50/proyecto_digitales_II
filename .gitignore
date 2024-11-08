@@ -1,3 +1,6 @@
 /armgcc
 /.vscode
 *.cmake
+*-backups
+*fp-info-cache
+*.csv

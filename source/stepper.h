@@ -1,3 +1,6 @@
+#ifndef STEPPER_H_
+#define STEPPER_H_
+
 #include "def.h"
 
 #define MOT_PORT_A1 0
@@ -46,9 +49,12 @@ void init_unipolar_stepper();
 void init_bipolar_stepper(direction_t dir);
 
 void test_unipolar_stepper();
+void test_bipolar_stepper();
 
 void make_unipolar_step(uint8_t step_state);
 
 void select_micro_steps(microstep_t option);
 void set_bipolar_direction(direction_t dir);
 void make_bipolar_step(void);
+
+#endif

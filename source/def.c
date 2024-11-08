@@ -24,6 +24,7 @@ void SysTick_Handler(void)
 		flag_tick_delay = 0;
 	flag_tick_delay++;
 	flag_tick_usart++;
+	flag_tick_boton++;
 }
 
 void USART0_IRQHandler(void) {
