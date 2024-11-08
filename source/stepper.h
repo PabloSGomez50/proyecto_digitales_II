@@ -4,13 +4,13 @@
 #include "def.h"
 
 #define MOT_PORT_A1 0
-#define MOT_PIN_A1  16
+#define MOT_PIN_A1  20
 #define MOT_PORT_A2 0
-#define MOT_PIN_A2  17
+#define MOT_PIN_A2  21
 #define MOT_PORT_B1 0
-#define MOT_PIN_B1  18
+#define MOT_PIN_B1  22
 #define MOT_PORT_B2 0
-#define MOT_PIN_B2  19
+#define MOT_PIN_B2  23
 
 #define MOT_ANGLE_PER_STEP 15
 
