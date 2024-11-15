@@ -52,3 +52,4 @@ void make_unipolar_step(uint8_t step_state);
 void select_micro_steps(microstep_t option);
 void set_bipolar_direction(direction_t dir);
 void make_bipolar_step(void);
+// void move_angle_

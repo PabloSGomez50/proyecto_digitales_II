@@ -76,17 +76,7 @@ int main(void) {
         PRINTF("Error en la lectura del iman:\nMD: %d\tML: %d\t MH: %d\n", md, ml, mh);
       }
 
-      if (lidar_data.ready != 0){
-        // PRINTF("%u, %u, %u, %u, %u\r\n", lidar_data.range, lidar_data.distance, lidar_data.signal_rate, lidar_data.ambient_light, lidar_data.spad_num);
-        sprintf(msg_usart, "%u, %u, %u, %u, %u\n", lidar_data.range, lidar_data.distance, lidar_data.signal_rate, lidar_data.ambient_light, lidar_data.spad_num);
-        USART_WriteBlocking(usart_port, msg_usart, strlen(msg_usart));
-      } else {
-        // PRINTF("Data not ready %i", lidar_data.ready);
-        sprintf(msg_usart, "Data not ready %i\n", lidar_data.ready);
-        USART_WriteBlocking(usart_port, msg_usart, strlen(msg_usart));
-        delay_mseg(20);
-      }
-
+      send_laser_uart(lidar_data, usart_port);
 
       make_bipolar_step();
       current_step++;
