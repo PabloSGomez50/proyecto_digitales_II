@@ -11,7 +11,7 @@ typedef enum {
     long_distance = 2,
 } laser_dist_mode;
 
-struct laser_data_t {
+typedef struct laser_data_t {
     uint8_t ready;
     uint16_t distance;
     uint8_t range;
@@ -25,4 +25,4 @@ extern uint16_t dev;
 
 
 void init_vl53l1x(uint16_t dev, uint16_t modo);
-struct laser_data_t get_data_laser(uint16_t dev);
+laser_data_t get_data_laser(uint16_t dev);

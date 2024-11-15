@@ -24,7 +24,7 @@ int main(void) {
     uint8_t status;
 
     // Variables del vl53l1x
-    struct laser_data_t lidar_data;
+    laser_data_t lidar_data;
     uint16_t buffer_dist[10] = {0};
     laser_dist_mode lidar_mode = long_distance;
 
