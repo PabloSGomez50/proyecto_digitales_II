@@ -10,16 +10,6 @@ struct step_seq_t sequence_full_steps[8] = {
     {1, 0, 0, 0},
     {0, 1, 0, 0}
 };
-// struct step_seq_t sequence_full_steps[8] = {
-//     {1, 0, 0, 1},
-//     {1, 1, 0, 0},
-//     {0, 1, 1, 0},
-//     {0, 0, 1, 1},
-//     {1, 0, 0, 1},
-//     {1, 1, 0, 0},
-//     {0, 1, 1, 0},
-//     {0, 0, 1, 1}
-// };
 
 struct step_seq_t sequence_half_steps[4] = {
     {1,0,0,0},
@@ -92,6 +82,17 @@ void make_unipolar_step(uint8_t step_state) {
 
 }
 
+uint8_t move_bipolar_angle(uint8_t anglex10) {
+    uint8_t steps = anglex10 * MOT_STEPS_PER_REV / 3600;
+    if (steps < 1)
+        return 1;
+
+    for (uint8_t i = 0; i < steps; i++)
+        make_bipolar_step();
+
+    return 0;
+}
+
 void test_unipolar_stepper() {
     estado_boton_t stop_test = soltado;
     int i = 0;
@@ -100,5 +101,61 @@ void test_unipolar_stepper() {
         delay_mseg(500);
         make_unipolar_step(i);
         i++;
+    }
+}
+
+void test_bipolar_stepper() {
+
+    estado_boton_t usr_btn = soltado, isp_btn = soltado;
+    uint8_t test_state = 0, test_mode = 0;
+    uint8_t last_state, last_step;
+    direction_t dir = CW;
+    set_bipolar_direction(dir);
+    while (1) {
+        lectura_boton(0, USR_BTN, &usr_btn);
+        lectura_boton(0, ISP_BTN, &isp_btn);
+
+        if (usr_btn == pulsado)
+            test_state = !test_state;
+        if (isp_btn == pulsado)
+            test_mode++;
+        if (test_mode >= 3)
+            test_mode = 0;
+
+        last_step = GPIO_PinRead(GPIO, MOT_PORT_STEP, MOT_PIN_STEP);
+        if (test_mode == 0) {
+            W_LED_RED(0);
+            W_LED_BLUE(1);
+            W_LED_GREEN(1);
+            if (last_state != test_state) {
+                make_bipolar_step();
+                last_state = test_state;
+            }
+        }
+        else if (test_mode == 1) {
+            W_LED_RED(1);
+            W_LED_BLUE(0);
+            W_LED_GREEN(1);
+            make_bipolar_step();
+        }
+        else if (test_mode == 2) {
+            W_LED_RED(1);
+            W_LED_BLUE(1);
+            W_LED_GREEN(0);
+            if (last_state != test_state) {
+                if (dir == CW)
+                    dir = CCW;
+                else
+                    dir = CW;
+                set_bipolar_direction(dir);
+
+                last_state = test_state;
+            }
+        }
+        
+        if (test_mode != 1)
+            delay_mseg(100);
+        else
+            delay_mseg(25);
     }
 }

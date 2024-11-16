@@ -19,12 +19,16 @@
 #include "fsl_i2c.h"
 
 
-#define TIEMPO_ANTIRREBOTE 40
+#define TIEMPO_ANTIRREBOTE 100
 #define USR_BTN 4
 #define ISP_BTN 12
 #define RED_PIN 2
 #define GREEN_PIN 0
 #define BLUE_PIN 1
+
+#define W_LED_RED(x) 	GPIO_PinWrite(GPIO, 1, RED_PIN, x)
+#define W_LED_BLUE(x) 	GPIO_PinWrite(GPIO, 1, BLUE_PIN, x)
+#define W_LED_GREEN(x) 	GPIO_PinWrite(GPIO, 1, GREEN_PIN, x)
 
 typedef enum {
 	soltado = 0,
@@ -33,6 +37,12 @@ typedef enum {
 	soltado_antirrebote = 3,
 } estado_boton_t;
 
+typedef enum {
+	m_active,
+	m_idle,
+} menu_t;
+
+extern menu_t menu;
 
 // Valores de I2C
 extern uint32_t baud;

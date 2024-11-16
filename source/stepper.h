@@ -1,15 +1,19 @@
+#ifndef STEPPER_H_
+#define STEPPER_H_
+
 #include "def.h"
 
 #define MOT_PORT_A1 0
-#define MOT_PIN_A1  16
+#define MOT_PIN_A1  20
 #define MOT_PORT_A2 0
-#define MOT_PIN_A2  17
+#define MOT_PIN_A2  21
 #define MOT_PORT_B1 0
-#define MOT_PIN_B1  18
+#define MOT_PIN_B1  22
 #define MOT_PORT_B2 0
-#define MOT_PIN_B2  19
+#define MOT_PIN_B2  23
 
-#define MOT_ANGLE_PER_STEP 15
+#define MOT_STEPS_PER_REV 200
+#define MOT_ANGLE_PER_READ 20
 
 #define MOT_PORT_DIR    MOT_PORT_A1
 #define MOT_PIN_DIR     MOT_PIN_A1
@@ -46,10 +50,13 @@ void init_unipolar_stepper();
 void init_bipolar_stepper(direction_t dir);
 
 void test_unipolar_stepper();
+void test_bipolar_stepper();
 
 void make_unipolar_step(uint8_t step_state);
 
 void select_micro_steps(microstep_t option);
 void set_bipolar_direction(direction_t dir);
 void make_bipolar_step(void);
-// void move_angle_
+uint8_t move_bipolar_angle(uint8_t anglex10);
+
+#endif

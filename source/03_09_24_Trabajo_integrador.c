@@ -15,6 +15,8 @@
 
 #define usart_port USART2
 #define USR_DEBUG 0
+#define TEST_STEPPER 1
+#define AS5600_ON 0
 
 
 int main(void) {
@@ -22,19 +24,19 @@ int main(void) {
     uint32_t baud = 400000;
     uint32_t frecuency = 12000000;
     uint8_t status;
+    menu_t menu = m_active;
 
     // Variables del vl53l1x
     laser_data_t lidar_data;
     uint16_t buffer_dist[10] = {0};
-    laser_dist_mode lidar_mode = long_distance;
+    laser_dist_mode lidar_mode = short_distance;
 
     // Variables del as6500
     uint16_t magnetic_angle = 0;
-    uint16_t mot_angle = 0;
 
     // Vars stepper
-    uint8_t current_step = 0;
     direction_t stepper_dir = CW;
+    uint16_t mot_angle = 0;
 
   	/* Init board hardware. */
     BOARD_InitBootPins();
@@ -48,7 +50,8 @@ int main(void) {
     init_bipolar_stepper(stepper_dir);
     select_micro_steps(full_step);
 
-    // test_stepper();
+    if (TEST_STEPPER)
+      test_bipolar_stepper();
     // Rx: 17   | Tx: 16
     init_SWM_USART(usart_port, kSWM_PortPin_P0_17, kSWM_PortPin_P0_16);
     // SCL: 18  | SDA: 19
@@ -56,7 +59,7 @@ int main(void) {
     init_vl53l1x(dev, lidar_mode);
 
 
-    if (refresh_magnet_status()) {
+    if (AS5600_ON && refresh_magnet_status()) {
       mot_angle = get_angle_position();
       if (USR_DEBUG)
         PRINTF("El valor del angulo es %i:", mot_angle);
@@ -65,22 +68,39 @@ int main(void) {
     }
 
     while(1) {
+      select_menu();
+      if (menu == m_active) {
 
-      lidar_data = get_data_laser(dev);
-      if (refresh_magnet_status()) {
-        magnetic_angle = get_angle_position();
+        lidar_data = get_data_laser(dev);
+        #if AS5600_ON
+          if (refresh_magnet_status()) {
+            magnetic_angle = get_angle_position();
+            
+            sprintf(msg_usart, "El valor del angulo es %i\n", magnetic_angle);
+            USART_WriteBlocking(usart_port, msg_usart, strlen(msg_usart) - 1);
+          } else {
+            PRINTF("Error en la lectura del iman:\nMD: %d\tML: %d\t MH: %d\n", md, ml, mh);
+          }
+        #endif
+
+        send_laser_uart(lidar_data, usart_port);
+
+        if (move_bipolar_angle(MOT_ANGLE_PER_READ)) {
+          if (USR_DEBUG)
+            printf("El motor no esta realizando pasos");
+        }
         
-        sprintf(msg_usart, "El valor del angulo es %i\n", magnetic_angle);
-        USART_WriteBlocking(usart_port, msg_usart, strlen(msg_usart) - 1);
-      } else {
-        PRINTF("Error en la lectura del iman:\nMD: %d\tML: %d\t MH: %d\n", md, ml, mh);
+        
+        mot_angle += MOT_ANGLE_PER_READ;
       }
-
-      send_laser_uart(lidar_data, usart_port);
-
-      make_bipolar_step();
-      current_step++;
-      mot_angle += MOT_ANGLE_PER_STEP;
     }
     return 0;
+}
+
+void select_menu() {
+  if(!strcmp("ACTIVE", buffer_usart))
+    menu = m_active;
+  else if (!strcmp("IDLE", buffer_usart))
+    menu = m_idle
+  
 }

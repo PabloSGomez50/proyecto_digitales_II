@@ -6,6 +6,7 @@ volatile uint32_t flag_tick_boton = 0;
 volatile uint32_t flag_tick_usart = 0;
 volatile uint32_t ref_tick;
 
+
 uint8_t buffer_usart[USART_SIZE] = "";
 uint8_t msg_usart[USART_SIZE] = "";
 uint8_t index_usart = 0;
@@ -24,9 +25,10 @@ void SysTick_Handler(void)
 		flag_tick_delay = 0;
 	flag_tick_delay++;
 	flag_tick_usart++;
+	flag_tick_boton++;
 }
 
-void USART0_IRQHandler(void) {
+void USART2_IRQHandler(void) {
 	flag_tick_usart = 0;
 	if (index_usart < USART_SIZE) {
 		buffer_usart[index_usart] = USART_ReadByte(USART0);
@@ -198,7 +200,6 @@ void init_SWM_USART(USART_Type * port, uint8_t rx, uint8_t tx) {
 
   // Setup config for usart - Corregir esos puntos  
 	usart_config_t config;
-
 	CLOCK_Select(p_clock);
 
 	USART_GetDefaultConfig(&config);
