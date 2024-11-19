@@ -34,10 +34,10 @@ void init_vl53l1x(uint16_t dev, uint16_t mode) {
 }
 
 
-struct laser_data_t get_data_laser(uint16_t dev) {
+laser_data_t get_data_laser(uint16_t dev) {
     uint8_t status;
 
-    struct laser_data_t data;
+    laser_data_t data;
     status = VL53L1X_CheckForDataReady(dev, &data.ready);
     if (data.ready != 0) {
         status = VL53L1X_GetRangeStatus(dev, &data.range);
@@ -49,4 +49,21 @@ struct laser_data_t get_data_laser(uint16_t dev) {
         status = VL53L1X_ClearInterrupt(dev);
     }
     return data;
+}
+
+uint8_t send_laser_uart(laser_data_t data, USART_Type *usart_port) {
+    char msg_usart[128] = "";
+    if (data.ready != 0){
+        sprintf(msg_usart, "%u, %u, %u, %u, %u\n",
+         data.range,
+         data.distance,
+         data.signal_rate,
+         data.ambient_light,
+         data.spad_num
+        );
+        USART_WriteBlocking(usart_port, msg_usart, strlen(msg_usart));
+    } else {
+        sprintf(msg_usart, "Data not ready %i\n", data.ready);
+        USART_WriteBlocking(usart_port, msg_usart, strlen(msg_usart));
+    }
 }

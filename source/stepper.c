@@ -66,7 +66,7 @@ void select_micro_steps(microstep_t option) {
 void make_bipolar_step(void) {
     // Make step
     GPIO_PinWrite(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, 1);
-    delay_mseg(25);
+    delay_mseg(MOT_STEP_TIME);
     GPIO_PinWrite(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, 0);
 
 }
@@ -80,6 +80,17 @@ void make_unipolar_step(uint8_t step_state) {
     GPIO_PinWrite(GPIO, MOT_PORT_B1, MOT_PIN_B1, step.mot_b1);
     GPIO_PinWrite(GPIO, MOT_PORT_B2, MOT_PIN_B2, step.mot_b2);
 
+}
+
+uint8_t move_bipolar_angle(uint16_t anglex10) {
+    uint8_t steps = anglex10 * MOT_STEPS_PER_REV / 3600;
+    if (steps < 1)
+        return 1;
+
+    for (uint8_t i = 0; i < steps; i++)
+        make_bipolar_step();
+
+    return 0;
 }
 
 void test_unipolar_stepper() {
@@ -97,17 +108,25 @@ void test_bipolar_stepper() {
 
     estado_boton_t usr_btn = soltado, isp_btn = soltado;
     uint8_t test_state = 0, test_mode = 0;
-    uint8_t last_state, last_step;
+    uint8_t last_state = 0, last_step = 0, isp_push = 0, usr_push = 0;
     direction_t dir = CW;
     set_bipolar_direction(dir);
     while (1) {
         lectura_boton(0, USR_BTN, &usr_btn);
         lectura_boton(0, ISP_BTN, &isp_btn);
 
-        if (usr_btn == pulsado)
+        if (usr_btn == pulsado && usr_push == 0) {
             test_state = !test_state;
-        if (isp_btn == pulsado)
+            usr_btn = 1;
+        }
+        if (isp_btn == pulsado && isp_push == 0) {
             test_mode++;
+            isp_push = 1;
+        }
+        if (isp_btn == soltado)
+            isp_push = 0;
+        if (usr_btn == soltado)
+            usr_push = 0;
         if (test_mode >= 3)
             test_mode = 0;
 
@@ -117,7 +136,7 @@ void test_bipolar_stepper() {
             W_LED_BLUE(1);
             W_LED_GREEN(1);
             if (last_state != test_state) {
-                make_bipolar_step();
+                move_bipolar_angle(MOT_ANGLE_PER_READ * 10);
                 last_state = test_state;
             }
         }
@@ -145,6 +164,6 @@ void test_bipolar_stepper() {
         if (test_mode != 1)
             delay_mseg(100);
         else
-            delay_mseg(5);
+            delay_mseg(25);
     }
 }

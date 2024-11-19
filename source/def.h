@@ -19,7 +19,7 @@
 #include "fsl_i2c.h"
 
 
-#define TIEMPO_ANTIRREBOTE 70
+#define TIEMPO_ANTIRREBOTE 40
 #define USR_BTN 4
 #define ISP_BTN 12
 #define RED_PIN 2
@@ -37,6 +37,12 @@ typedef enum {
 	soltado_antirrebote = 3,
 } estado_boton_t;
 
+typedef enum {
+	m_active,
+	m_idle,
+} menu_t;
+
+extern menu_t menu;
 
 // Valores de I2C
 extern uint32_t baud;
