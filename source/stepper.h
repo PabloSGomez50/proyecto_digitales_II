@@ -13,7 +13,8 @@
 #define MOT_PIN_B2  23
 
 #define MOT_STEPS_PER_REV 200
-#define MOT_ANGLE_PER_READ 20
+#define MOT_ANGLE_PER_READ 18
+#define MOT_STEP_TIME 50
 
 #define MOT_PORT_STEP   MOT_PORT_A1
 #define MOT_PIN_STEP    MOT_PIN_A1
@@ -57,6 +58,6 @@ void make_unipolar_step(uint8_t step_state);
 void select_micro_steps(microstep_t option);
 void set_bipolar_direction(direction_t dir);
 void make_bipolar_step(void);
-uint8_t move_bipolar_angle(uint8_t anglex10);
+uint8_t move_bipolar_angle(uint16_t anglex10);
 
 #endif

@@ -15,7 +15,7 @@
 
 #define usart_port USART2
 #define USR_DEBUG 0
-#define TEST_STEPPER 0
+#define TEST_STEPPER 1
 #define AS5600_ON 0
 
 menu_t select_menu();
