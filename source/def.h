@@ -19,7 +19,7 @@
 #include "fsl_i2c.h"
 
 
-#define TIEMPO_ANTIRREBOTE 100
+#define TIEMPO_ANTIRREBOTE 40
 #define USR_BTN 4
 #define ISP_BTN 12
 #define RED_PIN 2

@@ -108,17 +108,25 @@ void test_bipolar_stepper() {
 
     estado_boton_t usr_btn = soltado, isp_btn = soltado;
     uint8_t test_state = 0, test_mode = 0;
-    uint8_t last_state, last_step;
+    uint8_t last_state, last_step, isp_push = 0, usr_push = 0;
     direction_t dir = CW;
     set_bipolar_direction(dir);
     while (1) {
         lectura_boton(0, USR_BTN, &usr_btn);
         lectura_boton(0, ISP_BTN, &isp_btn);
 
-        if (usr_btn == pulsado)
+        if (usr_btn == pulsado && usr_push == 0) {
             test_state = !test_state;
-        if (isp_btn == pulsado)
+            usr_btn = 1;
+        }
+        if (isp_btn == pulsado && isp_push == 0) {
             test_mode++;
+            isp_push = 1;
+        }
+        if (isp_btn == soltado)
+            isp_push = 0;
+        if (usr_btn == soltado)
+            usr_push = 0;
         if (test_mode >= 3)
             test_mode = 0;
 

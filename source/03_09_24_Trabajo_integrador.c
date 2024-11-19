@@ -15,9 +15,12 @@
 
 #define usart_port USART2
 #define USR_DEBUG 0
-#define TEST_STEPPER 1
+#define TEST_STEPPER 0
 #define AS5600_ON 0
 
+menu_t select_menu();
+void check_usart_ajustments();
+uint8_t angle_per_read = MOT_ANGLE_PER_READ;
 
 int main(void) {
     uint16_t dev = VL53L1X_ADDRESS;
@@ -70,7 +73,7 @@ int main(void) {
     while(1) {
       select_menu();
       if (menu == m_active) {
-
+        check_usart_ajustments();
         lidar_data = get_data_laser(dev);
         #if AS5600_ON
           if (refresh_magnet_status()) {
@@ -90,17 +93,27 @@ int main(void) {
             printf("El motor no esta realizando pasos");
         }
         
-        
         mot_angle += MOT_ANGLE_PER_READ;
       }
     }
     return 0;
 }
 
-void select_menu() {
+void check_usart_ajustments() {
+  if (buffer_usart[0] == 'M') {
+    sscanf(buffer_usart, "M%u.", &angle_per_read);
+  } else if (buffer_usart[0] == 'L') {
+    // Change laser mode
+
+  }
+}
+
+menu_t select_menu() {
   if(!strcmp("ACTIVE", buffer_usart))
-    menu = m_active;
-  else if (!strcmp("IDLE", buffer_usart))
-    menu = m_idle
+    return m_active;
+  if (!strcmp("IDLE", buffer_usart))
+    return m_idle;
+  
+    return m_idle;
   
 }
