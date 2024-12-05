@@ -40,6 +40,7 @@ typedef enum {
 typedef enum {
 	m_active,
 	m_idle,
+	m_steps
 } menu_t;
 
 extern menu_t menu;

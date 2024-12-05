@@ -14,13 +14,15 @@
 #include "stepper.h"
 
 #define usart_port USART2
-#define USR_DEBUG 0
-#define TEST_STEPPER 1
+#define USR_DEBUG 1
+#define TEST_STEPPER 0
 #define AS5600_ON 0
 
 menu_t select_menu();
 void check_usart_ajustments();
 uint8_t angle_per_read = MOT_ANGLE_PER_READ;
+uint16_t max_steps = 0;
+uint16_t i_steps = 0;
 
 int main(void) {
     uint16_t dev = VL53L1X_ADDRESS;
@@ -86,14 +88,29 @@ int main(void) {
           }
         #endif
 
-        send_laser_uart(lidar_data, usart_port);
+        send_laser_uart(lidar_data, usart_port, mot_angle);
 
-        if (move_bipolar_angle(MOT_ANGLE_PER_READ)) {
+        if (move_bipolar_angle(angle_per_read)) {
           if (USR_DEBUG)
             printf("El motor no esta realizando pasos");
         }
         
-        mot_angle += MOT_ANGLE_PER_READ;
+        mot_angle += angle_per_read;
+      }
+      else if (menu == m_steps)
+      {
+        while(i_steps < max_steps) {
+          lidar_data = get_data_laser(dev);
+          send_laser_uart(lidar_data, usart_port, mot_angle);
+
+          if (move_bipolar_angle(angle_per_read)) {
+            if (USR_DEBUG)
+              printf("El motor no esta realizando pasos");
+          }
+          
+          mot_angle += angle_per_read;
+          i_steps++;
+        }
       }
     }
     return 0;
@@ -113,6 +130,11 @@ menu_t select_menu() {
     return m_active;
   if (!strcmp("IDLE", buffer_usart))
     return m_idle;
+  if(buffer_usart[0] == 'R') {
+    sscanf(buffer_usart, "R%u.", &max_steps);
+    i_steps = 0;
+    return m_steps;
+  }
   
     return m_idle;
   
