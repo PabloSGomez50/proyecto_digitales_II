@@ -99,7 +99,7 @@ int main(void) {
       }
       else if (menu == m_steps)
       {
-        while(i_steps < max_steps) {
+        while(i_steps < max_steps && menu == m_steps) {
           lidar_data = get_data_laser(dev);
           send_laser_uart(lidar_data, usart_port, mot_angle);
 
