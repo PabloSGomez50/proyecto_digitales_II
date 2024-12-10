@@ -19,6 +19,8 @@
 #include "fsl_i2c.h"
 
 
+#define USART_PORT USART1
+
 #define TIEMPO_ANTIRREBOTE 40
 #define USR_BTN 4
 #define ISP_BTN 12
@@ -63,6 +65,7 @@ extern gpio_pin_config_t in_config;
 
 void SysTick_Handler(void);
 void USART0_IRQHandler(void);
+void reset_usart(void);
 
 void init_systick(uint16_t div);
 void delay_mseg(uint16_t mseg);

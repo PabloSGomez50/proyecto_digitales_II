@@ -10,7 +10,7 @@ volatile uint32_t ref_tick;
 uint8_t buffer_usart[USART_SIZE] = "";
 uint8_t msg_usart[USART_SIZE] = "";
 uint8_t index_usart = 0;
-gpio_pin_config_t out_config = {kGPIO_DigitalOutput, 0};
+gpio_pin_config_t out_config = {kGPIO_DigitalOutput, 1};
 gpio_pin_config_t in_config = {kGPIO_DigitalInput};
 
 
@@ -28,12 +28,25 @@ void SysTick_Handler(void)
 	flag_tick_boton++;
 }
 
-void USART2_IRQHandler(void) {
-	flag_tick_usart = 0;
-	if (index_usart < USART_SIZE) {
-		buffer_usart[index_usart] = USART_ReadByte(USART0);
+void USART1_IRQHandler(void) {
+	if (flag_tick_usart > 3000) {
+		index_usart = 0;
+		flag_tick_usart = 0;
 	}
-	index_usart++;
+	if (index_usart < USART_SIZE) {
+		uint8_t c = USART_ReadByte(USART_PORT);
+		if (c != '\r' && c != '\n') {
+			buffer_usart[index_usart] = c;
+			index_usart++;
+		} else {
+			buffer_usart[index_usart] = '\0';
+		}
+	}
+}
+
+void reset_usart(void) {
+	index_usart = 0;
+	buffer_usart[0] = '\0';
 }
 
 // Normal functions

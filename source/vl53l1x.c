@@ -28,7 +28,6 @@ void init_vl53l1x(uint16_t dev, uint16_t mode) {
     status = VL53L1X_SetDistanceMode(dev, mode); /* 1=short, 2=long */
     status = VL53L1X_SetTimingBudgetInMs(dev, 100); /* in ms possible values [20, 50, 100, 200, 500] */
     status = VL53L1X_SetInterMeasurementInMs(dev, 100); /* in ms, IM must be > = TB */
-    printf("VL53L1X Ultra Lite Driver Example running ...\r\n");
     status = VL53L1X_StartRanging(dev);   /* This function has to be called to enable the ranging */
 
 }

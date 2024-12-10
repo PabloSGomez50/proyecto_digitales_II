@@ -82,6 +82,12 @@ void make_unipolar_step(uint8_t step_state) {
 
 }
 
+uint8_t move_bipolar_steps(uint16_t steps) {
+    for (uint16_t i = 0; i < steps; i++)
+        make_bipolar_step();
+    return 0;
+
+}
 uint8_t move_bipolar_angle(uint16_t anglex10) {
     uint8_t steps = anglex10 * MOT_STEPS_PER_REV / 3600;
     if (steps < 1)
@@ -136,7 +142,7 @@ void test_bipolar_stepper() {
             W_LED_BLUE(1);
             W_LED_GREEN(1);
             if (last_state != test_state) {
-                move_bipolar_angle(MOT_ANGLE_PER_READ * 10);
+                move_bipolar_angle(MOT_ANGLE_PER_STEP * 10);
                 last_state = test_state;
             }
         }
