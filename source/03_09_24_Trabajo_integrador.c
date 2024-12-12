@@ -77,10 +77,11 @@ int main(void) {
     }
 
     while(1) {
-      if (strlen(buffer_usart) > 0)
-        menu = select_menu();
-      if (menu == m_active) {
+      if (strlen(buffer_usart) > 0) {
         check_usart_ajustments();
+        menu = select_menu();
+      }
+      if (menu == m_active) {
         lidar_data = get_data_laser(dev);
         #if AS5600_ON
           if (refresh_magnet_status()) {
@@ -93,7 +94,7 @@ int main(void) {
           }
         #endif
 
-        send_laser_uart(lidar_data, USART_PORT, mot_angle);
+        send_laser_uart(lidar_data, USART_PORT, mot_angle / MOT_RATIO);
 
         if (move_bipolar_steps(steps_per_read)) {
           if (USR_DEBUG)
@@ -119,8 +120,11 @@ int main(void) {
 }
 
 void check_usart_ajustments() {
-  if (buffer_usart[0] == 'M') {
-    sscanf(buffer_usart, "M%u.", &steps_per_read);
+  if (buffer_usart[0] == 'M' && buffer_usart[strlen(buffer_usart) - 1] == '.') {
+    uint8_t match = sscanf(buffer_usart, "M%u.", &steps_per_read);
+    if (match) {
+      reset_usart();
+    }
   } else if (buffer_usart[0] == 'P') {
     // 
   }
@@ -141,7 +145,7 @@ menu_t select_menu() {
     reset_usart();
     return m_idle;
   }
-  if((char)buffer_usart[0] == 'R') {
+  if(buffer_usart[0] == 'R') {
         W_LED_RED(1);
         W_LED_GREEN(1);
         W_LED_BLUE(0);

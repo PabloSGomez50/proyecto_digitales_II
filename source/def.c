@@ -29,7 +29,7 @@ void SysTick_Handler(void)
 }
 
 void USART1_IRQHandler(void) {
-	if (flag_tick_usart > 3000) {
+	if (flag_tick_usart > 500) {
 		index_usart = 0;
 		flag_tick_usart = 0;
 	}
@@ -45,8 +45,9 @@ void USART1_IRQHandler(void) {
 }
 
 void reset_usart(void) {
+	for (int i = 0; i < index_usart; i++)
+		buffer_usart[i] = '\0';
 	index_usart = 0;
-	buffer_usart[0] = '\0';
 }
 
 // Normal functions

@@ -23,6 +23,7 @@ void init_bipolar_stepper(direction_t dir) {
     GPIO_PinInit(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_MS1, MOT_PIN_MS1, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_MS2, MOT_PIN_MS2, &out_config);
+    GPIO_PinWrite(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, 0);
     set_bipolar_direction(dir);
 }
 
@@ -68,6 +69,7 @@ void make_bipolar_step(void) {
     GPIO_PinWrite(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, 1);
     delay_mseg(MOT_STEP_TIME);
     GPIO_PinWrite(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, 0);
+    delay_mseg(MOT_STEP_TIME);
 
 }
 

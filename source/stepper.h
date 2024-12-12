@@ -14,7 +14,8 @@
 
 #define MOT_STEPS_PER_REV 200
 #define MOT_ANGLE_PER_STEP 18
-#define MOT_STEP_TIME 50
+#define MOT_STEP_TIME 75
+#define MOT_RATIO 2
 
 #define MOT_PORT_STEP   MOT_PORT_A1
 #define MOT_PIN_STEP    MOT_PIN_A1
