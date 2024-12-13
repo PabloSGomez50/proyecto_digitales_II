@@ -3648,12 +3648,12 @@
 		(uuid "ff207695-33b7-4bb2-bf92-b61714e944cf")
 	)
 	(no_connect
-		(at 36.83 31.75)
-		(uuid "0dee9e66-6404-4db4-830d-caf6b392646e")
+		(at 36.83 52.07)
+		(uuid "0b65fbf1-6a3e-439b-86fa-3af403c7c9b4")
 	)
 	(no_connect
-		(at 36.83 34.29)
-		(uuid "21ee6fa0-9428-4386-bea1-63b27373e9a0")
+		(at 36.83 39.37)
+		(uuid "10cbc824-1b3f-4a9b-83f6-5ca88a72df72")
 	)
 	(no_connect
 		(at 85.09 29.21)
@@ -3677,7 +3677,7 @@
 	)
 	(no_connect
 		(at 36.83 41.91)
-		(uuid "4f301022-1eaf-44f8-875c-40cb83b9d337")
+		(uuid "421f3e58-6f04-4484-86f1-f07b63e29362")
 	)
 	(no_connect
 		(at 36.83 69.85)
@@ -3696,16 +3696,16 @@
 		(uuid "7a5b4820-3dcb-4871-929f-20211b743ad0")
 	)
 	(no_connect
-		(at 36.83 29.21)
-		(uuid "7bc07bc5-bbab-4b5d-b4e1-15cc996a381c")
-	)
-	(no_connect
 		(at 85.09 31.75)
 		(uuid "819919a9-f15f-4d35-9b73-4b60eb0092a0")
 	)
 	(no_connect
 		(at 85.09 49.53)
 		(uuid "8391c101-f64b-4ea1-8bc2-471b2bec004d")
+	)
+	(no_connect
+		(at 36.83 29.21)
+		(uuid "8979b685-7a2f-457a-9920-d4e2de1913d3")
 	)
 	(no_connect
 		(at 85.09 62.23)
@@ -5532,6 +5532,28 @@
 			)
 		)
 	)
+	(global_label "DIR_AS5600"
+		(shape input)
+		(at 36.83 36.83 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "3bc94476-1e4c-477c-a3ee-30cf9cb292f3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 22.5963 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "MS1"
 		(shape input)
 		(at 121.92 53.34 180)
@@ -5545,28 +5567,6 @@
 		(uuid "51991f49-0242-4dbe-b155-8b58c2ef0fa2")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 115.0644 53.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "I2C1 - SCL"
-		(shape input)
-		(at 36.83 36.83 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "615e8174-488b-4623-8a3c-8e98f5733bc8")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 22.5358 36.83 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5686,6 +5686,28 @@
 			)
 		)
 	)
+	(global_label "I2C1 - SDA"
+		(shape input)
+		(at 36.83 34.29 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "7c42e533-6d4f-43dc-a56b-73baeb38c1ab")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 22.4753 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "I2C1 - SCL"
 		(shape input)
 		(at 133.35 151.13 0)
@@ -5721,28 +5743,6 @@
 		(uuid "887f366f-d33a-4f16-9460-eb48c20b81e8")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 110.4078 38.1 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "DIR_AS5600"
-		(shape input)
-		(at 36.83 52.07 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "916fed87-ec4c-4333-b398-b27ba6a06b95")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 22.5963 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5875,6 +5875,28 @@
 		(uuid "bfaed67e-528c-4a87-84ac-a9d1556c1192")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 21.9915 26.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "I2C1 - SCL"
+		(shape input)
+		(at 36.83 31.75 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "c114a7d4-3723-4273-a320-316e43adb901")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 22.5358 31.75 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6078,28 +6100,6 @@
 					(size 1.27 1.27)
 				)
 				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "I2C1 - SDA"
-		(shape input)
-		(at 36.83 39.37 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "f2c91f87-9e06-4673-8d34-9ceaf6636390")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 22.4753 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
 				(hide yes)
 			)
 		)
@@ -7763,7 +7763,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"
+		(property "Footprint" "Connector_Molex:Molex_SL_171971-0004_1x04_P2.54mm_Vertical"
 			(at 158.75 45.72 0)
 			(effects
 				(font
@@ -9806,7 +9806,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"
+		(property "Footprint" "Connector_Molex:Molex_SL_171971-0004_1x04_P2.54mm_Vertical"
 			(at 124.46 146.05 0)
 			(effects
 				(font
@@ -10137,7 +10137,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 140.97 21.844 0)
+			(at 140.97 21.336 0)
 			(effects
 				(font
 					(size 1.27 1.27)
