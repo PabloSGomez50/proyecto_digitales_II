@@ -4,27 +4,35 @@
 #include "def.h"
 
 #define MOT_PORT_A1 0
-#define MOT_PIN_A1  20
+#define MOT_PIN_A1  10
 #define MOT_PORT_A2 0
-#define MOT_PIN_A2  21
-#define MOT_PORT_B1 0
-#define MOT_PIN_B1  22
+#define MOT_PIN_A2  9
+#define MOT_PORT_B1 1
+#define MOT_PIN_B1  2
 #define MOT_PORT_B2 0
-#define MOT_PIN_B2  23
+#define MOT_PIN_B2  15
 
-#define MOT_STEPS_PER_REV 200
-#define MOT_ANGLE_PER_STEP 18
-#define MOT_STEP_TIME 75
+#define MOT_STEPS_PER_REV 230
+#define MOT_ANGLE_PER_STEP 3600 / MOT_STEPS_PER_REV
+#define MOT_STEP_TIME 10
 #define MOT_RATIO 2
 
-#define MOT_PORT_STEP   MOT_PORT_A1
-#define MOT_PIN_STEP    MOT_PIN_A1
-#define MOT_PORT_DIR    MOT_PORT_A2
-#define MOT_PIN_DIR     MOT_PIN_A2
-#define MOT_PORT_MS1    MOT_PORT_B1
-#define MOT_PIN_MS1     MOT_PIN_B1
-#define MOT_PORT_MS2    MOT_PORT_B2
-#define MOT_PIN_MS2     MOT_PIN_B2
+#define MOT_PORT_STEP   0
+#define MOT_PIN_STEP    8
+#define MOT_PORT_DIR    0
+#define MOT_PIN_DIR     9
+#define MOT_PORT_MS1    1
+#define MOT_PIN_MS1     2
+#define MOT_PORT_MS2    0
+#define MOT_PIN_MS2     15
+#define MOT_PORT_MS3    0
+#define MOT_PIN_MS3     14
+#define MOT_PORT_MRESET 0
+#define MOT_PIN_MRESET  13
+#define MOT_PORT_MSLEEP 0
+#define MOT_PIN_MSLEEP  11
+
+
 
 typedef enum {
     CW = 0, 
@@ -61,5 +69,7 @@ void set_bipolar_direction(direction_t dir);
 void make_bipolar_step(void);
 uint8_t move_bipolar_angle(uint16_t anglex10);
 uint8_t move_bipolar_steps(uint16_t steps);
+void start_stepper();
+void stop_stepper();
 
 #endif

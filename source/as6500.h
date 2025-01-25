@@ -1,6 +1,8 @@
 #include "def.h"
 // #define AS5600_ADDRESS 0x3C
 #define AS5600_ADDRESS 0x36
+#define AS5600_DIR_PORT 0 
+#define AS5600_DIR_PIN  21
 
 extern uint8_t magnet_status, md, ml, mh;
 
@@ -8,6 +10,9 @@ extern uint8_t buffer_as6500[3];
 
 // Direction polarity (GND = values increase clockwise,
 // VDD = values increase counterclockwise)
+
+void init_as5600_dir();
+void set_as5600_dir(uint8_t dir);
 
 uint8_t refresh_magnet_status(void);
 

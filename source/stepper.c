@@ -23,7 +23,12 @@ void init_bipolar_stepper(direction_t dir) {
     GPIO_PinInit(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_MS1, MOT_PIN_MS1, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_MS2, MOT_PIN_MS2, &out_config);
+    GPIO_PinInit(GPIO, MOT_PORT_MS3, MOT_PIN_MS3, &out_config);
+    GPIO_PinInit(GPIO, MOT_PORT_MSLEEP, MOT_PIN_MSLEEP, &out_config);
+    GPIO_PinInit(GPIO, MOT_PORT_MRESET, MOT_PIN_MRESET, &out_config);
+    GPIO_PinWrite(GPIO, MOT_PORT_MRESET, MOT_PIN_MRESET, 1);
     GPIO_PinWrite(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, 0);
+    GPIO_PinWrite(GPIO, MOT_PORT_MSLEEP, MOT_PIN_MSLEEP, 0);
     set_bipolar_direction(dir);
 }
 
@@ -46,18 +51,22 @@ void select_micro_steps(microstep_t option) {
         case full_step:
             GPIO_PinWrite(GPIO, MOT_PORT_MS1, MOT_PIN_MS1, 0);
             GPIO_PinWrite(GPIO, MOT_PORT_MS2, MOT_PIN_MS2, 0);
+            GPIO_PinWrite(GPIO, MOT_PORT_MS3, MOT_PIN_MS3, 0);
             break;
         case half_step:
             GPIO_PinWrite(GPIO, MOT_PORT_MS1, MOT_PIN_MS1, 1);
             GPIO_PinWrite(GPIO, MOT_PORT_MS2, MOT_PIN_MS2, 0);
+            GPIO_PinWrite(GPIO, MOT_PORT_MS3, MOT_PIN_MS3, 0);
             break;
         case quarter_step:
             GPIO_PinWrite(GPIO, MOT_PORT_MS1, MOT_PIN_MS1, 0);
             GPIO_PinWrite(GPIO, MOT_PORT_MS2, MOT_PIN_MS2, 1);
+            GPIO_PinWrite(GPIO, MOT_PORT_MS3, MOT_PIN_MS3, 0);
             break;
         case eighth_step:
             GPIO_PinWrite(GPIO, MOT_PORT_MS1, MOT_PIN_MS1, 1);
             GPIO_PinWrite(GPIO, MOT_PORT_MS2, MOT_PIN_MS2, 1);
+            GPIO_PinWrite(GPIO, MOT_PORT_MS3, MOT_PIN_MS3, 0);
             break;
         default:
             break;
@@ -119,6 +128,7 @@ void test_bipolar_stepper() {
     uint8_t last_state = 0, last_step = 0, isp_push = 0, usr_push = 0;
     direction_t dir = CW;
     set_bipolar_direction(dir);
+    start_stepper();
     while (1) {
         lectura_boton(0, USR_BTN, &usr_btn);
         lectura_boton(0, ISP_BTN, &isp_btn);
@@ -135,29 +145,32 @@ void test_bipolar_stepper() {
             isp_push = 0;
         if (usr_btn == soltado)
             usr_push = 0;
-        if (test_mode >= 3)
+        if (test_mode >= 3) {
             test_mode = 0;
+            start_stepper();
+        }
 
         last_step = GPIO_PinRead(GPIO, MOT_PORT_STEP, MOT_PIN_STEP);
         if (test_mode == 0) {
-            W_LED_RED(0);
-            W_LED_BLUE(1);
-            W_LED_GREEN(1);
+            // W_LED_RED(0);
+            // W_LED_BLUE(1);
+            // W_LED_GREEN(1);
             if (last_state != test_state) {
                 move_bipolar_angle(MOT_ANGLE_PER_STEP * 10);
                 last_state = test_state;
             }
         }
         else if (test_mode == 1) {
-            W_LED_RED(1);
-            W_LED_BLUE(0);
-            W_LED_GREEN(1);
+            // W_LED_RED(1);
+            // W_LED_BLUE(0);
+            // W_LED_GREEN(1);
             make_bipolar_step();
         }
         else if (test_mode == 2) {
-            W_LED_RED(1);
-            W_LED_BLUE(1);
-            W_LED_GREEN(0);
+            // W_LED_RED(1);
+            // W_LED_BLUE(1);
+            // W_LED_GREEN(0);
+            stop_stepper();
             if (last_state != test_state) {
                 if (dir == CW)
                     dir = CCW;
@@ -174,4 +187,11 @@ void test_bipolar_stepper() {
         else
             delay_mseg(25);
     }
+}
+
+void start_stepper() {
+    GPIO_PinWrite(GPIO, MOT_PORT_MSLEEP, MOT_PIN_MSLEEP, 1);
+}
+void stop_stepper() {
+    GPIO_PinWrite(GPIO, MOT_PORT_MSLEEP, MOT_PIN_MSLEEP, 0);
 }
