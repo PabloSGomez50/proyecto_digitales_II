@@ -2,6 +2,16 @@
 
 uint8_t magnet_status, md, ml, mh, buffer_as6500[3];
 
+
+void init_as5600_dir() {
+    GPIO_PortInit(GPIO, AS5600_DIR_PORT);
+    GPIO_PinInit(GPIO, AS5600_DIR_PORT, AS5600_DIR_PIN, &out_config);
+}
+
+void set_as5600_dir(uint8_t dir) {
+    GPIO_PinWrite(GPIO, AS5600_DIR_PORT, AS5600_DIR_PIN, dir);
+}
+
 uint8_t refresh_magnet_status() {
     request_i2c_data(AS5600_ADDRESS, 0x0B, buffer_as6500, 1);
     magnet_status = (buffer_as6500[0]>> 3) & 0x7;

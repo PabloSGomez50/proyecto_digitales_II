@@ -38,28 +38,31 @@ laser_data_t get_data_laser(uint16_t dev) {
 
     laser_data_t data;
     status = VL53L1X_CheckForDataReady(dev, &data.ready);
-    if (data.ready != 0) {
-        status = VL53L1X_GetRangeStatus(dev, &data.range);
-        status = VL53L1X_GetDistance(dev, &data.distance);
-        status = VL53L1X_GetSignalRate(dev, &data.signal_rate);
-        status = VL53L1X_GetAmbientRate(dev, &data.ambient_light);
-        status = VL53L1X_GetSpadNb(dev, &data.spad_num);
-        /* clear interrupt has to be called to enable next interrupt*/
-        status = VL53L1X_ClearInterrupt(dev);
+    while (!data.ready) {
+        status = VL53L1X_CheckForDataReady(dev, &data.ready);
     }
+    status = VL53L1X_GetRangeStatus(dev, &data.range);
+    status = VL53L1X_GetDistance(dev, &data.distance);
+    status = VL53L1X_GetSignalRate(dev, &data.signal_rate);
+    status = VL53L1X_GetAmbientRate(dev, &data.ambient_light);
+    status = VL53L1X_GetSpadNb(dev, &data.spad_num);
+    /* clear interrupt has to be called to enable next interrupt*/
+    status = VL53L1X_ClearInterrupt(dev);
+    
     return data;
 }
 
 uint8_t send_laser_uart(laser_data_t data, USART_Type *usart_port, uint16_t mot_angle) {
     char msg_usart[128] = "";
     if (data.ready != 0){
-        sprintf(msg_usart, "$%u, %u, %u, %u, %u, %u\n",
+        sprintf(msg_usart, "$%u, %u, %u, %u, %u, %u, %u\n",
          data.range,
          data.distance,
          data.signal_rate,
          data.ambient_light,
          data.spad_num,
-         mot_angle % 3600
+         mot_angle % 3600,
+         mot_angle / 3600
         );
         USART_WriteBlocking(usart_port, msg_usart, strlen(msg_usart));
     } else {
