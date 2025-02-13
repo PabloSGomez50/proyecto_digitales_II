@@ -16,7 +16,7 @@
 #define USR_DEBUG 0
 #define TEST_STEPPER 0
 #define TEST_USART 0
-#define AS5600_ON 0
+#define AS5600_ON 1
 
 menu_t select_menu();
 void check_usart_ajustments();
@@ -78,10 +78,12 @@ int main(void) {
     }
 
     while(1) {
-      if (strlen(buffer_usart) > 0) {
+      if (strlen(buffer_usart) > 0)
         check_usart_ajustments();
+      
+      if (strlen(buffer_usart) > 0)
         menu = select_menu();
-      }
+
       if (menu == m_active) {
         lidar_data = get_data_laser(dev);
         #if AS5600_ON

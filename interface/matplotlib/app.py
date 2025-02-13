@@ -7,6 +7,10 @@ import threading
 import time
 import plot 
 import serial
+import logging
+
+logger = logging.getLogger("app")
+
 
 df = plot.get_initial_df()
 ser = None
@@ -19,8 +23,12 @@ def init_serial():
         ser.close()
     port = input_port.get()
     baud = input_baud.get()
-    ser = serial.Serial(port, baud, timeout=1)
-    
+    logger.info(f'Values from inputs PORT:{port}. BAUD: {baud}')
+    try:
+        ser = serial.Serial(port, baud, timeout=1)
+    except Exception as e:
+        logger.error(f"Init serial {port} {baud}: {e}")
+
 def close_serial():
     global ser
     if ser is not None:
@@ -90,7 +98,7 @@ button3.pack(pady=4, padx=16)
 
 # Main content
 main_frame = ctk.CTkFrame(root)
-main_frame.grid(row=2, column=1, sticky="nsew")
+main_frame.grid(row=1, column=1, sticky="nsew")
 
 main_title_label = ctk.CTkLabel(main_frame, text="Polar Plot", font=("Arial", 14))
 main_title_label.pack(pady=10)
