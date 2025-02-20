@@ -3,7 +3,7 @@ import click
 import pandas as pd
 # import datetime
 import time
-
+from plot import read_serial, format_lidar_data
 
 port = 'COM4'  # Revisar en el administrador de dispositivos
 baud_rate = 9600
@@ -20,37 +20,15 @@ def get_available_ports():
     for port in serial.tools.list_ports.comports():
         print("Port:", port.device)
         try:
-            with serial.Serial(port.device, baud_rate, timeout=1) as ser:
+            with serial.Serial(port.device, baud_rate, timeout=0.1) as ser:
                 ser.write("STATUS\n".encode('utf-8'))
-                value = None
-                while value is None:
-                    time.sleep(0.5)
-                    value = read_serial(ser)
-                if value is not None:
+                
+                if value := read_serial(ser):
                     print(f"{port.device} - {value}")
                     ports.append(port.device)
         except serial.SerialException:
             print(f"Error in {port.device}")
     return ports
-
-def read_serial(ser):
-    return ser.readline().decode('utf-8').strip() if ser.in_waiting > 0 else None
-
-def format_lidar_data(data: str):
-
-    keys = [
-        "range",
-        "distance",
-        "signal_rate",
-        "ambient_light",
-        "spad_num",
-        "mot_angle",
-        "lap_num"
-    ]
-    if isinstance(data, str) and data[0] == '$':
-        return {key: item for key, item in zip(keys, data[1:].split(', '))}
-    else:
-        return dict()
 
 @cli.command()
 @click.option('--port', '-p', default=port,  help='Puerto serial')
