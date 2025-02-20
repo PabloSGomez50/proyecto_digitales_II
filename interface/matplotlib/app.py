@@ -1,38 +1,44 @@
 import customtkinter as ctk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-import numpy as np
+import pandas as pd
 from PIL import Image, ImageTk
 import threading
 import time
-import plot 
+import plot
 import serial
-import logging
+from logger_config import setup_logger
 
-logger = logging.getLogger("app")
+logger = setup_logger()
 
-
-df = plot.get_initial_df()
+default_port = "COM4"
+# df = plot.get_initial_df()
+data = list()
 ser = None
-input_port = None
-input_baud = None
 
 def init_serial():
     global ser
     if ser is not None:
+        ser.write("IDLE\n".encode('utf-8'))
         ser.close()
-    port = input_port.get()
-    baud = input_baud.get()
+    port = port_variable.get()
+    try:
+        baud = int(baud_variable.get())
+    except ValueError:
+        logger.error(f"No se ingreso un valor valido de baud rate: {baud_variable.get()}")
     logger.info(f'Values from inputs PORT:{port}. BAUD: {baud}')
     try:
-        ser = serial.Serial(port, baud, timeout=1)
+        ser = serial.Serial(port, baud, timeout=0.5)
+        ser.write("ACTIVE\n".encode('utf-8'))
     except Exception as e:
         logger.error(f"Init serial {port} {baud}: {e}")
 
 def close_serial():
     global ser
     if ser is not None:
+        ser.write("IDLE\n".encode('utf-8'))
         ser.close()
+        logger.info("Serial closed")
     
 def toggle_sidebar():
     if sidebar_frame.winfo_viewable():
@@ -42,6 +48,21 @@ def toggle_sidebar():
 
 def update_plot():
     while True:
+        
+        if ser is not None and (value := plot.read_serial(ser)):
+            if value := plot.format_lidar_data(value):
+                row = plot.format_df(value)
+                logger.debug(f"Data: {row['distance']}")
+                data.append(row)
+        else:
+            # logger.debug("No data")
+            time.sleep(0.3)
+            continue
+
+        df = pd.DataFrame(data)
+        if df.empty:
+            time.sleep(1)
+            continue
         angles = df["angle"]
         radii = df["distance"]
         ax.clear()
@@ -50,6 +71,7 @@ def update_plot():
         canvas.draw()
         time.sleep(1)
 
+
 # Initialize the main CustomTkinter window
 ctk.set_appearance_mode("System")  # Modes: "System", "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue", "green", "dark-blue"
@@ -57,6 +79,10 @@ ctk.set_default_color_theme("blue")  # Themes: "blue", "green", "dark-blue"
 root = ctk.CTk()
 root.title("Proyecto Digitales II - Pablo Gomez")
 root.geometry("1920x1200")
+
+port_variable = ctk.StringVar(value=default_port)
+baud_variable = ctk.IntVar(value=9600)
+
 
 # Header
 header_frame = ctk.CTkFrame(root, height=60, corner_radius=0)
@@ -91,6 +117,11 @@ button1.pack(pady=4, padx=16)
 
 # entry2 = ctk.CTkEntry(sidebar_frame, placeholder_text="Input 2")
 # entry2.pack(pady=4, padx=16)
+input_baud = ctk.CTkEntry(sidebar_frame, placeholder_text="Baud rate:", textvariable=baud_variable)
+input_baud.pack(pady=4, padx=16)
+input_port = ctk.CTkEntry(sidebar_frame, placeholder_text="Port:", textvariable=port_variable)
+input_port.pack(pady=4, padx=16)
+
 button2 = ctk.CTkButton(sidebar_frame, text="Iniciar", command=init_serial)
 button2.pack(pady=4, padx=16)
 button3 = ctk.CTkButton(sidebar_frame, text="Frenar")
@@ -113,6 +144,8 @@ root.rowconfigure(1, weight=1)
 root.columnconfigure(1, weight=1)
 
 
+
+
 if __name__ == '__main__':
     # Start a thread to update the plot
     plot_thread = threading.Thread(target=update_plot, daemon=True)
@@ -120,7 +153,6 @@ if __name__ == '__main__':
 
     # Start the CustomTkinter main loop
     try:
-
         root.mainloop()
     except KeyboardInterrupt:
         pass
