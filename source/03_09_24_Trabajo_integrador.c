@@ -70,9 +70,9 @@ int main(void) {
     }
     // SCL: 18  | SDA: 19
     init_i2c1(kSWM_PortPin_P0_19, kSWM_PortPin_P0_20, baud, frecuency);
-    set_bipolar_direction(CCW);
+    // set_bipolar_direction(CCW);
     init_vl53l1x(dev, lidar_mode);
-    set_bipolar_direction(stepper_dir);
+    // set_bipolar_direction(stepper_dir);
 
     #if AS5600_ON
       init_as5600_dir();
@@ -101,22 +101,22 @@ int main(void) {
 
         if (AS5600_ON && refresh_magnet_status()) {
           magnetic_angle = get_angle_position() * 10 / MOT_RATIO;
-          diff_angle = abs(magnetic_angle - last_magnetic_angle);
+          // diff_angle = abs(magnetic_angle - last_magnetic_angle);
           last_magnetic_angle = magnetic_angle;
 
-          if (diff_angle > 900) {
-            diff_angle = abs(1800 - diff_angle);
+          if (abs(magnetic_angle - last_magnetic_angle) > 900) {
+            // diff_angle = abs(1800 - diff_angle);
             magnetic_full_turns++;
             sprintf(msg_usart, "Se dio una vuelta completa del as5600: %d\r\n", magnetic_full_turns);
             USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
           }
-          if (stepper_dir == CW)
+          if (stepper_dir == CCW)
             magnetic_angle = 1800 - magnetic_angle;
           mot_angle = magnetic_full_turns * 1800 + magnetic_angle;
           // mot_angle += diff_angle;
           
-          sprintf(msg_usart, "El valor del angulo es %i\r\n", magnetic_angle);
-          USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
+          // sprintf(msg_usart, "El valor del angulo es %i\r\n", magnetic_angle);
+          // USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
         } else {
           if (USR_DEBUG)
             PRINTF("Error en la lectura del iman:\nMD: %d\tML: %d\t MH: %d\n", md, ml, mh);
