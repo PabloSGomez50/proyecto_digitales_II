@@ -11,20 +11,31 @@
 #include "def.h"
 #include "vl53l1x.h"
 #include "as6500.h"
-#include "stepper.h"
+#include "motors.h"
 
 #define USR_DEBUG 0
 #define TEST_STEPPER 0
 #define TEST_USART 0
 #define AS5600_ON 1
+#define STEPPER_MOTOR_USED 1
 
 menu_t select_menu();
 void check_usart_ajustments();
+uint16_t get_mot_angle();
 uint8_t steps_per_read = 3;
 uint16_t max_steps = 0;
 uint16_t i_steps = 0;
 uint16_t mot_angle = 0;
-uint16_t max_angle = 0;
+
+
+// Variables del as6500
+uint16_t magnetic_angle = 0;
+uint16_t last_magnetic_angle = 0;
+uint8_t diff_angle = 0;
+uint16_t magnetic_full_turns = 0;
+
+// Vars stepper
+direction_t stepper_dir = CW;
 
 int main(void) {
     uint16_t dev = VL53L1X_ADDRESS;
@@ -37,15 +48,6 @@ int main(void) {
     laser_data_t lidar_data;
     laser_dist_mode lidar_mode = short_distance;
 
-    // Variables del as6500
-    uint16_t magnetic_angle = 0;
-    uint16_t last_magnetic_angle = 0;
-    uint8_t diff_angle = 0;
-    uint16_t magnetic_full_turns = 0;
-
-    // Vars stepper
-    direction_t stepper_dir = CW;
-
   	/* Init board hardware. */
     BOARD_InitBootPins();
     BOARD_BootClockFRO18M();
@@ -55,8 +57,12 @@ int main(void) {
     init_gpio();
     init_systick(1000);
     
+    #if STEPPER_MOTOR_USED
     init_bipolar_stepper(stepper_dir);
     select_micro_steps(full_step);
+    #else
+    init_dc_motor();
+    #endif
 
     if (TEST_STEPPER)
       test_bipolar_stepper();
@@ -68,7 +74,7 @@ int main(void) {
       // USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
       delay_mseg(100);
     }
-    // SCL: 18  | SDA: 19
+    // SCL: 19  | SDA: 20
     init_i2c1(kSWM_PortPin_P0_19, kSWM_PortPin_P0_20, baud, frecuency);
     // set_bipolar_direction(CCW);
     init_vl53l1x(dev, lidar_mode);
@@ -89,43 +95,31 @@ int main(void) {
     }
 
     while(1) {
-      if (strlen(buffer_usart) > 0)
-        check_usart_ajustments();
       
-      if (strlen(buffer_usart) > 0)
+
+      if (strlen(buffer_usart) > 0) {
+        check_buffer_restart();
+        // delay_mseg(5);
+        check_usart_ajustments();
+      }
+      
+      if (strlen(buffer_usart) > 0) {
+        check_buffer_restart();
+        delay_mseg(5);
         menu = select_menu();
+      }
 
       if (menu == m_active) {
         lidar_data = get_data_laser(dev);
         send_laser_uart(lidar_data, USART_PORT, mot_angle);
 
-        if (AS5600_ON && refresh_magnet_status()) {
-          magnetic_angle = get_angle_position() * 10 / MOT_RATIO;
-          // diff_angle = abs(magnetic_angle - last_magnetic_angle);
-          last_magnetic_angle = magnetic_angle;
-
-          if (abs(magnetic_angle - last_magnetic_angle) > 900) {
-            // diff_angle = abs(1800 - diff_angle);
-            magnetic_full_turns++;
-            sprintf(msg_usart, "Se dio una vuelta completa del as5600: %d\r\n", magnetic_full_turns);
-            USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
-          }
-          if (stepper_dir == CCW)
-            magnetic_angle = 1800 - magnetic_angle;
-          mot_angle = magnetic_full_turns * 1800 + magnetic_angle;
-          // mot_angle += diff_angle;
-          
-          // sprintf(msg_usart, "El valor del angulo es %i\r\n", magnetic_angle);
-          // USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
-        } else {
-          if (USR_DEBUG)
-            PRINTF("Error en la lectura del iman:\nMD: %d\tML: %d\t MH: %d\n", md, ml, mh);
-          mot_angle += MOT_ANGLE_PER_STEP * steps_per_read;
-        }
+        mot_angle = get_mot_angle();
+        #if STEPPER_MOTOR_USED
         if (move_bipolar_steps(steps_per_read)) {
           if (USR_DEBUG)
             printf("El motor no esta realizando pasos");
         }
+        #endif
         
       }
       else if (menu == m_steps)
@@ -134,8 +128,11 @@ int main(void) {
           lidar_data = get_data_laser(dev);
           send_laser_uart(lidar_data, USART_PORT, mot_angle / MOT_RATIO);
           
+          #if STEPPER_MOTOR_USED
           move_bipolar_steps(steps_per_read);
-          mot_angle += MOT_ANGLE_PER_STEP * steps_per_read;
+          #endif
+          mot_angle = get_mot_angle();
+          // mot_angle += MOT_ANGLE_PER_STEP * steps_per_read;
           i_steps += steps_per_read;
           // make_bipolar_step();
           // mot_angle += MOT_ANGLE_PER_STEP;
@@ -147,6 +144,34 @@ int main(void) {
       }
     }
     return 0;
+  }
+  
+uint16_t get_mot_angle() {
+  if (!AS5600_ON)
+    return mot_angle + MOT_ANGLE_PER_STEP * steps_per_read;
+    
+  if (refresh_magnet_status()) {
+    magnetic_angle = get_angle_position() * 10 / MOT_RATIO;
+    // diff_angle = abs(magnetic_angle - last_magnetic_angle);
+    
+    if (abs(magnetic_angle - last_magnetic_angle) > 900) {
+      // diff_angle = abs(1800 - diff_angle);
+      magnetic_full_turns++;
+      sprintf(msg_usart, "Se dio una vuelta completa del as5600: %d\r\n", magnetic_full_turns);
+      USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
+    }
+    if (stepper_dir == CCW)
+      magnetic_angle = 1800 - magnetic_angle;
+      
+    sprintf(msg_usart, "El valor del angulo es %i\r\nEl angulo total es: %i",
+      magnetic_angle,
+      magnetic_full_turns * 1800 + magnetic_angle
+    );
+    USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
+    last_magnetic_angle = magnetic_angle;
+    return magnetic_full_turns * 1800 + magnetic_angle;
+  }
+  return mot_angle;
 }
 
 void check_usart_ajustments() {
@@ -179,9 +204,12 @@ menu_t select_menu() {
     // W_LED_GREEN(1);
     // W_LED_BLUE(1);
     reset_usart();
+    #if STEPPER_MOTOR_USED
     start_stepper();
-    sprintf(msg_usart, "New menu selected: ACTIVE\n");
-    max_angle += 3600;
+    #else
+    start_dc_motor(stepper_dir);
+    #endif
+    sprintf(msg_usart, "New menu selected: ACTIVE\r\n");
     USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
     return m_active;
   }
@@ -190,11 +218,16 @@ menu_t select_menu() {
     // W_LED_GREEN(0);
     // W_LED_BLUE(1);
     reset_usart();
+    #if STEPPER_MOTOR_USED
     stop_stepper();
-    sprintf(msg_usart, "New menu selected: IDLE\n");
+    #else
+    stop_dc_motor();
+    #endif
+    sprintf(msg_usart, "New menu selected: IDLE\r\n");
     USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
     return m_idle;
   }
+  #if STEPPER_MOTOR_USED
   if(buffer_usart[0] == 'R' && buffer_usart[strlen(buffer_usart) - 1] == '.') {
     // W_LED_RED(1);
     // W_LED_GREEN(1);
@@ -208,6 +241,7 @@ menu_t select_menu() {
     start_stepper();
     return m_steps;
   }
-    return m_idle;
+  #endif
+  return m_idle;
   
 }

@@ -11,6 +11,8 @@ uint8_t buffer_usart[USART_SIZE] = "";
 uint8_t msg_usart[USART_SIZE] = "";
 uint8_t index_usart = 0;
 gpio_pin_config_t out_config = {kGPIO_DigitalOutput, 1};
+gpio_pin_config_t out_config_low = {kGPIO_DigitalOutput, 0};
+
 gpio_pin_config_t in_config = {kGPIO_DigitalInput};
 
 
@@ -28,11 +30,15 @@ void SysTick_Handler(void)
 	flag_tick_boton++;
 }
 
-void USART1_IRQHandler(void) {
+void check_buffer_restart() {
 	if (flag_tick_usart > 500) {
 		index_usart = 0;
 		flag_tick_usart = 0;
 	}
+}
+
+void USART1_IRQHandler(void) {
+	check_buffer_restart();
 	if (index_usart < USART_SIZE) {
 		uint8_t c = USART_ReadByte(USART_PORT);
 		if (c != '\r' && c != '\n') {
