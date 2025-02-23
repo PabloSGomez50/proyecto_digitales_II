@@ -16,8 +16,8 @@
 #define USR_DEBUG 0
 #define TEST_STEPPER 0
 #define TEST_USART 0
-#define AS5600_ON 0
-#define STEPPER_MOTOR_USED 0
+#define AS5600_ON 1
+#define STEPPER_MOTOR_USED 1
 
 menu_t select_menu();
 void check_usart_ajustments();
@@ -144,15 +144,16 @@ int main(void) {
       }
     }
     return 0;
-}
-
+  }
+  
 uint16_t get_mot_angle() {
-
-  if (AS5600_ON && refresh_magnet_status()) {
+  if (!AS5600_ON)
+    return mot_angle + MOT_ANGLE_PER_STEP * steps_per_read;
+    
+  if (refresh_magnet_status()) {
     magnetic_angle = get_angle_position() * 10 / MOT_RATIO;
     // diff_angle = abs(magnetic_angle - last_magnetic_angle);
-    last_magnetic_angle = magnetic_angle;
-
+    
     if (abs(magnetic_angle - last_magnetic_angle) > 900) {
       // diff_angle = abs(1800 - diff_angle);
       magnetic_full_turns++;
@@ -161,15 +162,16 @@ uint16_t get_mot_angle() {
     }
     if (stepper_dir == CCW)
       magnetic_angle = 1800 - magnetic_angle;
+      
+    sprintf(msg_usart, "El valor del angulo es %i\r\nEl angulo total es: %i",
+      magnetic_angle,
+      magnetic_full_turns * 1800 + magnetic_angle
+    );
+    USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
+    last_magnetic_angle = magnetic_angle;
     return magnetic_full_turns * 1800 + magnetic_angle;
-    // mot_angle += diff_angle;
-    
-    // sprintf(msg_usart, "El valor del angulo es %i\r\n", magnetic_angle);
-    // USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
   }
-  
-  return mot_angle + MOT_ANGLE_PER_STEP * steps_per_read;
-
+  return mot_angle;
 }
 
 void check_usart_ajustments() {
