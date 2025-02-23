@@ -60,12 +60,14 @@ extern uint8_t msg_usart[USART_SIZE];
 extern uint8_t index_usart;
 
 extern gpio_pin_config_t out_config;
+extern gpio_pin_config_t out_config_low;
 extern gpio_pin_config_t in_config;
 
 
 void SysTick_Handler(void);
 void USART0_IRQHandler(void);
 void reset_usart(void);
+void check_buffer_restart(void);
 
 void init_systick(uint16_t div);
 void delay_mseg(uint16_t mseg);

@@ -1,7 +1,40 @@
-#ifndef STEPPER_H_
-#define STEPPER_H_
+#ifndef MOTORS_H_
+#define MOTORS_H_
 
 #include "def.h"
+
+
+typedef enum {
+    CW = 0, 
+    CCW = 1
+} direction_t;
+
+typedef enum {
+    full_step,
+    half_step,
+    quarter_step,
+    eighth_step
+} microstep_t;
+
+struct step_seq_t {
+    uint8_t mot_a1 : 1;
+    uint8_t mot_a2 : 1;
+    uint8_t mot_b1 : 1;
+    uint8_t mot_b2 : 1;
+};
+
+
+// DC Motor
+#define MOTOR_PORT_1 0
+#define MOTOR_PIN_1 0
+#define MOTOR_PORT_2 0
+#define MOTOR_PIN_2 1
+
+void init_dc_motor(void);
+void start_dc_motor(direction_t dir);
+void stop_dc_motor(void);
+
+// Steppers
 
 #define MOT_PORT_A1 0
 #define MOT_PIN_A1  10
@@ -33,25 +66,6 @@
 #define MOT_PIN_MSLEEP  11
 
 
-
-typedef enum {
-    CW = 0, 
-    CCW = 1
-} direction_t;
-
-typedef enum {
-    full_step,
-    half_step,
-    quarter_step,
-    eighth_step
-} microstep_t;
-
-struct step_seq_t {
-    uint8_t mot_a1 : 1;
-    uint8_t mot_a2 : 1;
-    uint8_t mot_b1 : 1;
-    uint8_t mot_b2 : 1;
-};
 
 extern struct step_seq_t sequence_full_steps[8];
 extern struct step_seq_t sequence_half_steps[4];

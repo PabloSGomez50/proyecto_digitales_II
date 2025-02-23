@@ -1,5 +1,28 @@
-#include "stepper.h"
-// https://i.sstatic.net/nyeOe.gif
+#include "motors.h"
+
+// DC Motor
+
+void init_dc_motor() {
+    GPIO_PinInit(GPIO, MOTOR_PORT_1, MOTOR_PIN_1, &out_config_low);
+    GPIO_PinInit(GPIO, MOTOR_PORT_2, MOTOR_PIN_2, &out_config_low);
+}
+
+void start_dc_motor(direction_t dir) {
+    if (dir == CW) {
+        GPIO_PinWrite(GPIO, MOTOR_PORT_1, MOTOR_PIN_1, 1);
+        GPIO_PinWrite(GPIO, MOTOR_PORT_2, MOTOR_PIN_2, 0);
+    } else {
+        GPIO_PinWrite(GPIO, MOTOR_PORT_1, MOTOR_PIN_1, 0);
+        GPIO_PinWrite(GPIO, MOTOR_PORT_2, MOTOR_PIN_2, 1);
+    }
+}
+
+void stop_dc_motor() {
+    GPIO_PinWrite(GPIO, MOTOR_PORT_1, MOTOR_PIN_1, 0);
+    GPIO_PinWrite(GPIO, MOTOR_PORT_2, MOTOR_PIN_2, 0);
+}
+// Stepper
+
 struct step_seq_t sequence_full_steps[8] = {
     {1, 0, 0, 0},
     {0, 1, 0, 0},
