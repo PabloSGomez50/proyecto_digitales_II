@@ -61,9 +61,9 @@ void init_gpio(void) {
 	
     GPIO_PortInit(GPIO, 0);
     GPIO_PortInit(GPIO, 1);
-    GPIO_PinInit(GPIO, 1, RED_PIN, &out_config);
-    GPIO_PinInit(GPIO, 1, GREEN_PIN, &out_config);
-    GPIO_PinInit(GPIO, 1, BLUE_PIN, &out_config);
+    // GPIO_PinInit(GPIO, 1, RED_PIN, &out_config);
+    // GPIO_PinInit(GPIO, 1, GREEN_PIN, &out_config);
+    // GPIO_PinInit(GPIO, 1, BLUE_PIN, &out_config);
     GPIO_PinInit(GPIO, 0, USR_BTN, &in_config);
     GPIO_PinInit(GPIO, 0, ISP_BTN, &in_config);
 }

@@ -17,9 +17,9 @@
 #define TEST_STEPPER 0
 #define TEST_USART 0
 #define AS5600_ON 1
-#define STEPPER_MOTOR_USED 1
+#define STEPPER_MOTOR_USED 0
 
-menu_t select_menu();
+void select_menu(menu_t * menu);
 void check_usart_ajustments();
 uint16_t get_mot_angle();
 uint8_t steps_per_read = 3;
@@ -69,7 +69,7 @@ int main(void) {
     // Rx: 17   | Tx: 16
     init_SWM_USART(USART_PORT, kSWM_PortPin_P0_17, kSWM_PortPin_P0_16);
     while (TEST_USART) {
-      menu = select_menu();
+      select_menu(&menu);
       // sprintf(msg_usart, "Menu test\n");
       // USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
       delay_mseg(100);
@@ -90,8 +90,8 @@ int main(void) {
       last_magnetic_angle = mot_angle;
       if (USR_DEBUG)
         PRINTF("El valor del angulo es: %i\n", mot_angle);
-      sprintf(msg_usart, "El valor del angulo es %i\r\n", mot_angle);
-      USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
+      // sprintf(msg_usart, "El valor del angulo es %i\r\n", mot_angle);
+      // USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
     }
 
     while(1) {
@@ -99,14 +99,11 @@ int main(void) {
 
       if (strlen(buffer_usart) > 0) {
         check_buffer_restart();
-        // delay_mseg(5);
         check_usart_ajustments();
       }
       
       if (strlen(buffer_usart) > 0) {
-        check_buffer_restart();
-        delay_mseg(5);
-        menu = select_menu();
+        select_menu(&menu);
       }
 
       if (menu == m_active) {
@@ -157,17 +154,17 @@ uint16_t get_mot_angle() {
     if (abs(magnetic_angle - last_magnetic_angle) > 900) {
       // diff_angle = abs(1800 - diff_angle);
       magnetic_full_turns++;
-      sprintf(msg_usart, "Se dio una vuelta completa del as5600: %d\r\n", magnetic_full_turns);
-      USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
+      // sprintf(msg_usart, "Se dio una vuelta completa del as5600: %d\r\n", magnetic_full_turns);
+      // USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
     }
     if (stepper_dir == CCW)
       magnetic_angle = 1800 - magnetic_angle;
       
-    sprintf(msg_usart, "El valor del angulo es %i\r\nEl angulo total es: %i",
-      magnetic_angle,
-      magnetic_full_turns * 1800 + magnetic_angle
-    );
-    USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
+    // sprintf(msg_usart, "El valor del angulo es %i\r\nEl angulo total es: %i",
+    //   magnetic_angle,
+    //   magnetic_full_turns * 1800 + magnetic_angle
+    // );
+    // USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
     last_magnetic_angle = magnetic_angle;
     return magnetic_full_turns * 1800 + magnetic_angle;
   }
@@ -198,7 +195,7 @@ void check_usart_ajustments() {
   }
 }
 
-menu_t select_menu() {
+void select_menu(menu_t * menu) {
   if(!strcmp("ACTIVE", buffer_usart)) {
     // W_LED_RED(0);
     // W_LED_GREEN(1);
@@ -211,7 +208,8 @@ menu_t select_menu() {
     #endif
     sprintf(msg_usart, "New menu selected: ACTIVE\r\n");
     USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
-    return m_active;
+    *menu = m_active;
+    return ;
   }
   if (!strcmp("IDLE",  buffer_usart)) {
     // W_LED_RED(1);
@@ -225,7 +223,8 @@ menu_t select_menu() {
     #endif
     sprintf(msg_usart, "New menu selected: IDLE\r\n");
     USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
-    return m_idle;
+    *menu = m_idle;
+    return ;
   }
   #if STEPPER_MOTOR_USED
   if(buffer_usart[0] == 'R' && buffer_usart[strlen(buffer_usart) - 1] == '.') {
@@ -239,9 +238,9 @@ menu_t select_menu() {
     USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
     reset_usart();
     start_stepper();
-    return m_steps;
+    *menu = m_steps;
+    return ;
   }
   #endif
-  return m_idle;
-  
+  // return m_idle;
 }
