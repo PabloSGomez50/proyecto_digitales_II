@@ -26,9 +26,9 @@ struct step_seq_t {
 
 // DC Motor
 #define MOTOR_PORT_1 0
-#define MOTOR_PIN_1 0
+#define MOTOR_PIN_1 14
 #define MOTOR_PORT_2 0
-#define MOTOR_PIN_2 1
+#define MOTOR_PIN_2 15
 
 void init_dc_motor(void);
 void start_dc_motor(direction_t dir);
@@ -47,7 +47,7 @@ void stop_dc_motor(void);
 
 #define MOT_STEPS_PER_REV 230
 #define MOT_ANGLE_PER_STEP 3600 / MOT_STEPS_PER_REV
-#define MOT_STEP_TIME 10
+#define MOT_STEP_TIME 30
 #define MOT_RATIO 2
 
 #define MOT_PORT_STEP   0
