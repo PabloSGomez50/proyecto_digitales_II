@@ -1,0 +1,117 @@
+/* Sidebar */
+.main-container .sidebar {
+    width: clamp(8rem, 25vw, 16rem);
+    height: calc(100% - 2rem);
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 1px 0 4px 0px rgba(0, 0, 0, 0.1);
+
+    font-size: 12px;
+}
+
+/* Profile */
+.profile-container {
+    /* height: var(--header-height); */
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    /* width: 100%; */
+    font-size: 11px;
+    padding: 0 1rem;
+    padding-bottom: 0.25rem;
+    gap: 0.5rem;
+    border-bottom: solid 1px var(--primary-200);
+}
+
+.profile-container > div {
+    gap: 1rem;
+}
+
+.profile-container > .small-icon {
+    margin-left: 1.5rem;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.profile-icon-img {
+    width: 2rem;
+    height: fit-content;
+    margin-right: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+/* Options */
+.sidebar-options {
+    width: 85%;
+    flex: 1;
+    padding-top: 1rem;
+    gap: 1rem;
+}
+
+.sidebar-option {
+    width: calc(100% - 1.5rem);
+    height: 2.5rem;
+    display: flex;
+    padding: 0 0.75rem;
+    align-items: center;
+    justify-content: left;
+    gap: 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.sidebar-option-active {
+    background-color: var(--gray-200);
+    font-weight: bold;
+}
+
+
+.sidebar-suboptions {
+    width: 80%;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.5s ease-in;
+    display: flex;
+    flex-direction: column;
+    padding-left: 1.25rem;
+}
+
+.sidebar-suboptions li {
+    padding: 0.5rem 0;
+    padding-left: 0.75rem;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    /* background-color: white; */
+}
+
+.sidebar-suboptions li:last-child {
+    border-bottom: none;
+}
+
+.sidebar-suboptions.show {
+    max-height: 12rem;
+}
+
+
+/* Config */
+
+.main-container .sidebar-config {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.main-container .sidebar .icon {
+    background-color: transparent;
+}
+
+.main-container .sidebar li {
+    cursor: pointer;
+}

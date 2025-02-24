@@ -29,11 +29,11 @@ struct laser_data {
   uint16_t mot_angle;
   uint16_t mot_lap;
 };
-#define DATA_SIZE 32
+#define DATA_SIZE 128
 struct laser_data data[DATA_SIZE] = {0};
 uint8_t data_index = 0;
 
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 128
 #define MAX_USART_MS 500
 char buffer[BUFFER_SIZE] = {0};
 uint16_t usart_index = 0;
@@ -119,19 +119,6 @@ uint8_t readSerial() {
 
 struct laser_data parseData() {
   struct laser_data content;
-  // Extract values from the formatted string
-  // uint8_t match_number = sscanf(buffer, "$%u, %u, %u, %u, %u, %u, %u",
-  //   &content.range,
-  //   &content.distance,
-  //   &content.signal_rate,
-  //   &content.ambient_light,
-  //   &content.spad_num,
-  //   &content.mot_angle,
-  //   &content.mot_lap
-  // );
-  // if (match_number != 7) {
-  //   memset(&content, 0, sizeof(content)); // Reset on mismatch
-  // }
     if (buffer[0] != '$') {
     return content;
   }
@@ -228,7 +215,7 @@ void setupServerRoutes() {
 }
 
 void handleRoot() {
-  String text = "Esp01 Server activo en ip: " + ipaddress + ", Necesitaas mas información?";
+  String text = "Esp01 Server activo en ip: " + ipaddress + ", Necesitaas mas informacion?";
 
   server.send(200, "text/plain", text);
 }
