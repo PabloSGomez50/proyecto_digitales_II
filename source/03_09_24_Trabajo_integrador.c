@@ -107,9 +107,8 @@ int main(void) {
 
       if (menu == m_active) {
         lidar_data = get_data_laser(dev);
-        send_laser_uart(lidar_data, USART_PORT, mot_angle);
-
         mot_angle = get_mot_angle();
+        send_laser_uart(lidar_data, USART_PORT, mot_angle);
         
         if (motor_stepper_mode && move_bipolar_steps(steps_per_read)) {
           if (USR_DEBUG)
@@ -177,13 +176,14 @@ void check_usart_ajustments() {
     return;
   }
   if (!strcmp("STATUS", buffer_usart)) {
-    sprintf(msg_usart, "Status alive, steps: %d\r\n", steps_per_read);
+    sprintf(msg_usart, "Status alive, steps: %d, mode: %d\r\n", steps_per_read, motor_stepper_mode);
     USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
     reset_usart();
     return;
   }
   if (!strcmp("RESET", buffer_usart)) {
     mot_angle = 0;
+    mot_angle = get_mot_angle();
     sprintf(msg_usart, "Reset motor angle\r\n");
     USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
     reset_usart();
@@ -205,6 +205,12 @@ void check_usart_ajustments() {
   if (!strcmp("DC_MOTOR", buffer_usart)) {
     motor_stepper_mode = 0;
     sprintf(msg_usart, "Stepper mode: %i\r\n", motor_stepper_mode);
+    USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
+    reset_usart();
+    return;
+  }
+  if (!strcmp("BATTERY", buffer_usart)) {
+    sprintf(msg_usart, "Battery level: %u\r\n", get_battery_level());
     USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
     reset_usart();
     return;

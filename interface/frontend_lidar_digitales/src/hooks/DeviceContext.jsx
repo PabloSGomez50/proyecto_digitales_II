@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
+
+const IP_REGEX = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/;
 const DeviceContext = createContext();
 
 export const useDevice = () => useContext(DeviceContext);
@@ -26,7 +28,7 @@ export const DeviceProvider = ({ children }) => {
       // }
       const response = await axios.get(`http://${dns_url}/`);
       // Response example: Esp01 Server activo en ip: 192.168.10.161, Necesitaas
-      const ip = response.data.match(/(\d{1,3}\.){3}\d{1,3}/)[0];
+      const ip = response.data.match(IP_REGEX)[0];
       setDevices(prev => {
         return prev.map(dev => {
           if (dev.id === id) {

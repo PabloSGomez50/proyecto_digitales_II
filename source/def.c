@@ -230,3 +230,41 @@ void init_SWM_USART(USART_Type * port, uint8_t rx, uint8_t tx) {
 	USART_EnableInterrupts(p_port, kUSART_RxReadyInterruptEnable);
 	NVIC_EnableIRQ(p_nvic);
 }
+
+void init_adc() {
+	CLOCK_EnableClock(kCLOCK_Swm);
+
+    SWM_SetFixedPinSelect(SWM0, kSWM_ADC_CHN1, true);
+
+    CLOCK_DisableClock(kCLOCK_Swm);
+	POWER_DisablePD(kPDRUNCFG_PD_ADC0);
+    uint16_t frequency = CLOCK_GetFreq(kCLOCK_Fro) / CLOCK_GetClkDivider(kCLOCK_DivAdcClk);
+    (void) ADC_DoSelfCalibration(ADC0, frequency);
+    
+	adc_config_t adcConfigStruct;
+    adcConfigStruct.clockMode = kADC_ClockSynchronousMode;
+    adcConfigStruct.clockDividerNumber = 1;
+    adcConfigStruct.enableLowPowerMode = false;
+    adcConfigStruct.voltageRange = kADC_HighVoltageRange;
+    ADC_Init(ADC0, &adcConfigStruct);
+    
+    adc_conv_seq_config_t adcConvSeqConfigStruct;
+    adcConvSeqConfigStruct.channelMask = 1 << ADC_CHANNEL; 
+    adcConvSeqConfigStruct.triggerMask = 0;
+    adcConvSeqConfigStruct.triggerPolarity = kADC_TriggerPolarityPositiveEdge;
+    adcConvSeqConfigStruct.enableSingleStep = false;
+    adcConvSeqConfigStruct.enableSyncBypass = false;
+    adcConvSeqConfigStruct.interruptMode = kADC_InterruptForEachSequence;
+    ADC_SetConvSeqAConfig(ADC0, &adcConvSeqConfigStruct);
+    ADC_EnableConvSeqA(ADC0, true); 
+	ADC_DoSoftwareTriggerConvSeqA(ADC0);
+}
+
+
+uint16_t get_battery_level() {
+	while (!ADC_GetChannelConversionResult(ADC0, ADC_CHANNEL, &adcResultInfoStruct)) {
+		delay_mseg(5);
+	}
+	ADC_DoSoftwareTriggerConvSeqA(ADC0);
+	return (uint16_t) adcResultInfoStruct.result;
+}

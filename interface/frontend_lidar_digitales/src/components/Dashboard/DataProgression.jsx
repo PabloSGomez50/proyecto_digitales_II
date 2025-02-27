@@ -10,7 +10,18 @@ const DataProgression = ({ data, row, column }) => {
     //     "distance": [20, 25, 45, 80, 80, 80, 40],
     //     "mot_angle": [0, 0, 450, 900, 1350, 1800, 2250],
     //   }
+    useEffect(() => {
+        const handleResize = () => {
+            Plotly.Plots.resize(graphRef.current);
+        };
 
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+    
     useEffect(() => {
         console.log(data);
         const mot_angle = data?.mot_angle ? data.mot_angle : [];

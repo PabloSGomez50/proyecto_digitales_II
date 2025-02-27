@@ -152,12 +152,16 @@ struct laser_data parseData() {
 
 void setupDNS() {
   if (!MDNS.begin(apDomain)) {
+    #if SERIAL_ON
     Serial.println("Error setting up MDNS responder!");
+    #endif
     while(1) {
       delay(1000);
     }
   }
+  #if SERIAL_ON
   Serial.println("mDNS responder started");
+  #endif
 }
 
 
@@ -260,8 +264,6 @@ void handleMessage() {
 
   Serial.write(message, strlen(message));
 
-  // server.send(200, "application/json", R"({"status": "Message sent to LPC845"})");
-  // return;
   if (readSerial() == 1) {
     String response = R"({"status": "Message sent with response", "msg": ")" + String(buffer) + "\"}";
     server.send(200, "application/json", response);
@@ -277,7 +279,7 @@ void handleBuffer() {
 
 void handleStart() {
   Serial.write("ACTIVE\n", 7);
-  // server.send(200, "application/json", "{\"status\": \"LPC845 started\"}");
+
   if (readSerial() == 1)
     server.send(200, "application/json", "{\"status\": \"LPC845 started\", \"msg\": \"" + String(buffer) + "\"}");
   else

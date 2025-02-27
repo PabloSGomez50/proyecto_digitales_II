@@ -9,6 +9,7 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "LPC845.h"
+#include "fsl_adc.h"
 #include "fsl_debug_console.h"
 #include "fsl_common.h"
 #include "fsl_adc.h"
@@ -20,6 +21,7 @@
 
 
 #define USART_PORT USART1
+#define ADC_CHANNEL 1
 
 #define TIEMPO_ANTIRREBOTE 40
 #define USR_BTN 4
@@ -63,6 +65,8 @@ extern gpio_pin_config_t out_config;
 extern gpio_pin_config_t out_config_low;
 extern gpio_pin_config_t in_config;
 
+adc_result_info_t adcResultInfoStruct;
+
 
 void SysTick_Handler(void);
 void USART0_IRQHandler(void);
@@ -72,6 +76,7 @@ void check_buffer_restart(void);
 void init_systick(uint16_t div);
 void delay_mseg(uint16_t mseg);
 
+void init_adc(void);
 void init_gpio(void);
 void lectura_boton (uint8_t puerto, uint8_t boton, estado_boton_t *estado);
 void init_i2c1(uint8_t pin_scl, uint8_t pin_sda, uint32_t baudRate, uint32_t frecuency);
@@ -80,5 +85,7 @@ void request_i2c_data(uint16_t I2C_Addr, uint16_t register_addr, uint8_t * data,
 
 
 void init_SWM_USART(USART_Type * port, uint8_t rx, uint8_t tx);
+
+uint16_t get_battery_level();
 
 #endif

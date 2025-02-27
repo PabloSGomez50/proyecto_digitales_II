@@ -5,10 +5,11 @@ import WilliamsLogo from '../../assets/imgs/Logo_Williams_F1.png';
 import axios from 'axios';
 
 import { FaPlus } from "react-icons/fa6";
+import { IoReloadCircle } from "react-icons/io5";
 import DataChip from "./DataChip";
-import RankTable from "./RankTable";
+
 import DataProgression from "./DataProgression";
-import MediumGraph from "./MediumGraph";
+
 import { useDevice } from "../../hooks/DeviceContext";
 import DeviceCommands from "../Devices/DeviceCommands";
 
@@ -26,21 +27,31 @@ const Dashboard = () => {
                     <img src={user?.profile_img || WilliamsLogo} className='profile-icon-img' alt='Page icon'/>
                     <p>{user?.email}</p>
                 </div>
-                <div>
-                    <span>Estado de {device?.name}: </span>
-                    {device?.active ? 
+                <div className="dashboard-status">
+                    {device?.name ?
+                    <>
+                        <span>Estado de {device.name}: </span>
+                        {device?.active ? 
                         <span className='dev-active'>Activo</span>
-                     :
+                        :
                         <span className='dev-inactive'>Inactivo</span>
+                        }
+                        
+                        <IoReloadCircle className="small-icon" />
+                    </>
+                    :
+                    <span>Seleccionar un dispositivo en el Header</span>
                     }
                 </div>
-                {/* <div>
-                    <button>Resumen</button>
-                    <button>Amigos</button>
-                    <button>Historial</button>
-                </div> */}
+                
             </div>
-            <div className="dashboard-data">
+            <div
+                className="dashboard-data"
+                style={{
+                    gridTemplateColumns: "repeat(5, 1fr)",
+                    gridTemplateRows: "repeat(4, 1fr)"
+                }}
+            >
                 <DataChip
                     Icon={FaPlus}
                     data={{name: 'Modo motor', value: device?.data?.mode, default: "Desconocido"}}
@@ -71,6 +82,12 @@ const Dashboard = () => {
                     row={"1 / 5"}
                     column={"3 / 7"}
                 />
+                {/* <DataChip
+                    Icon={FaPlus}
+                    data={{name: 'Data', value: device?.data?.current_lap, default: 0}}
+                    row={4}
+                    column={3}
+                /> */}
 
                 {/* <RankTable
                     data={device?.data?.ranking || []}
