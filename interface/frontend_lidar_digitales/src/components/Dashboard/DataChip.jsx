@@ -3,11 +3,11 @@
 const DataChip = ({ data, row, column, Icon }) => {
     return (
         <div className='data-chip' style={{gridRow: row, gridColumn: column}}>
-            <Icon className="icon" />
-            <div>
+            <div className="flex gap-1">
+                <Icon className="small-icon" />
                 <p>{data.name}</p>
-                <p>{data.value || 0}</p>
             </div>
+            <p>{data?.value || data?.default || 0}</p>
         </div>
     )
 }

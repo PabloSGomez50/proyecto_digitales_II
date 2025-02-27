@@ -9,98 +9,92 @@ import DataChip from "./DataChip";
 import RankTable from "./RankTable";
 import DataProgression from "./DataProgression";
 import MediumGraph from "./MediumGraph";
+import { useDevice } from "../../hooks/DeviceContext";
+import DeviceCommands from "../Devices/DeviceCommands";
 
-const api_url = "";
 
 const Dashboard = () => {
     
-    const {user} = useUser();
-    const [data, setData] = useState(undefined);
+    const { user } = useUser();
+    const { device } = useDevice();
 
-    useEffect(() => {
-        const fetchData = async (user_id) => {
-            try {
-                const response = await axios.get(`${api_url}/user/${user_id}`, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`
-                    }
-                });
-                setData(response.data.values);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        }
-        // fetchData();
-        setData({
-            ranking: [
-                {id: 1, name: 'Pablo', points: 100},
-                {id: 2, name: 'Martu', points: 90},
-            ]
-        });
-    }, []);
+
     return (
         <section className='dashboard-container'>
-            <div className="dashboard-header">
+            <div className="dashboard-header gap-0-5">
                 <div className="dashboard-profile">
                     <img src={user?.profile_img || WilliamsLogo} className='profile-icon-img' alt='Page icon'/>
                     <p>{user?.email}</p>
                 </div>
                 <div>
+                    <span>Estado de {device?.name}: </span>
+                    {device?.active ? 
+                        <span className='dev-active'>Activo</span>
+                     :
+                        <span className='dev-inactive'>Inactivo</span>
+                    }
+                </div>
+                {/* <div>
                     <button>Resumen</button>
                     <button>Amigos</button>
                     <button>Historial</button>
-                </div>
+                </div> */}
             </div>
             <div className="dashboard-data">
                 <DataChip
                     Icon={FaPlus}
-                    data={{name: 'Puntos', value: data?.points}}
+                    data={{name: 'Modo motor', value: device?.data?.mode, default: "Desconocido"}}
                     row={1}
                     column={1}
                 />
                 <DataChip
                     Icon={FaPlus}
-                    data={{name: 'Juegos Realizados', value: data?.points}}
+                    data={{name: 'Pasos por lectura', value: device?.data?.steps_per_read}}
                     row={1}
                     column={2}
                 />
                 <DataChip
                     Icon={FaPlus}
-                    data={{name: 'Duelos Ganados', value: data?.points}}
+                    data={{name: 'Puntos Guardados', value: device?.points?.length, default: 0}}
                     row={2}
                     column={1}
                 />
                 <DataChip
                     Icon={FaPlus}
-                    data={{name: 'Duelos Perdidos', value: data?.points}}
+                    data={{name: 'Vueltas completadas', value: device?.data?.current_lap, default: 0}}
                     row={2}
                     column={2}
-                />
-
-                <RankTable
-                    data={data?.ranking || []}
-                    row={"3 / 5"}
-                    column={"1 / 3"}
                 />
 
                 <DataProgression
-                    data={data?.progression || []}
-                    row={"1 / 3"}
+                    data={device?.points}
+                    row={"1 / 5"}
                     column={"3 / 7"}
                 />
 
+                {/* <RankTable
+                    data={device?.data?.ranking || []}
+                    row={"3 / 5"}
+                    column={"1 / 3"}
+                /> */}
+                <DeviceCommands
+                    data={device?.data?.ranking || []}
+                    row={"3 / 5"}
+                    column={"1 / 3"}
+                />
+                {/*
                 <MediumGraph
                     title="Proximos partidos"
-                    data={data?.duels || []}
+                    data={device?.data?.duels || []}
                     row={"3 / 5"}
                     column={"3 / 5"}
                 />
                 <MediumGraph
                     title="Calendario desafios"
-                    data={data?.calendar || []}
+                    data={device?.data?.calendar || []}
                     row={"3 / 5"}
                     column={"5 / 7"}
-                />
+                /> */}
             </div>
 
         </section>

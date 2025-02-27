@@ -4,11 +4,12 @@ const SidebarOption = ({ Icon, title, selected, setSelected }) => {
     const navigate = useNavigate();
     const handleClick = () => {
         setSelected(title.toLowerCase());
-        if (title == 'Dashboard') {
-            navigate('/');
-        } else {
-            navigate(`/${title.toLowerCase()}`);
-        }
+        navigate(`/${title.toLowerCase()}`);
+        // if (title == 'Dashboard') {
+        //     navigate('/');
+        // } else {
+        //     navigate(`/${title.toLowerCase()}`);
+        // }
     }
 
     return (

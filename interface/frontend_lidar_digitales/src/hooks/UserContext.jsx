@@ -21,7 +21,27 @@ export const UserProvider = ({ children }) => {
     return true;
   }
 
+  const makeDummyUser = (userData) => {
+    if (userData.email_or_username.includes("@")) {
+      userData.email = userData.email_or_username;
+      userData.username = userData.email_or_username.split("@")[0];
+    } else {
+      userData.email = userData.email_or_username + "@gmail.com";
+      userData.username = userData.email_or_username;
+    }
+    const dummy = {
+      email: userData.email,
+      username: userData.username
+    };
+    setUser(dummy);
+    localStorage.setItem('user', JSON.stringify(dummy));
+    navigate('/');
+  }
   const register = async (userData) => {
+    if (import.meta.env.VITE_DEP_ENV === 'development') {
+      makeDummyUser(userData);
+      return ;
+    }
     try {
       const response = await axiosAuth.post("/register", userData);
       console.log(response.data);
@@ -37,6 +57,10 @@ export const UserProvider = ({ children }) => {
   }
 
   const login = async(userData) => {
+    if (import.meta.env.VITE_DEP_ENV === 'development') {
+      makeDummyUser(userData);
+      return ;
+    }
     try {
       const response = await axiosAuth.post("/login", userData);
       console.log(response.data);

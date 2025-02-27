@@ -1,0 +1,98 @@
+.auth-container {
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--background-light); /* Light blue background */
+}
+
+.auth-form {
+    width: 320px;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    text-align: center;
+    background-color: white; /* White background for the form */
+}
+
+.auth-form h2 {
+    margin: 1rem 0;
+    color: var(--primary-600); /* Deep blue for the heading */
+}
+
+.auth-form .img-container {
+    width: 4rem;
+    height: 4rem;
+    padding: 1rem;
+    display: flex;
+    /* box-sizing: border-box; */
+    border-radius: 50%;
+    background-color: var(--background-light);
+    border: 1px solid var(--primary-200);
+}
+.auth-form .img-container > img {
+    width: 4rem;
+    margin: auto 0;
+}
+
+
+
+.inputs-container {
+    margin: 0.5rem 0;
+}
+.auth-form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid var(--primary-200); /* Light blue border */
+    border-radius: 4px;
+    outline: none;
+  
+}
+.auth-form input:focus {
+    border-color: var(--primary-600); /* Highlight border on focus */
+    box-shadow: 0 0 4px rgba(30, 136, 229, 0.5);
+}
+
+
+.auth-form button {
+    width: 75%;
+    padding: 10px;
+    background-color: var(--primary-600); /* Blue button */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.auth-form button:hover {
+    background-color: var(--primary-800);
+}
+.auth-form button:active, .auth-form button::selection {
+    background-color: #0d47a1;
+    border: none;
+    outline: none;
+}
+.auth-form button:disabled {
+    background-color: var(--primary-200);
+    cursor: not-allowed;
+}
+
+.auth-form a {
+    margin-top: 1rem;
+    margin-right: auto;
+    margin-left: 0.5rem;
+    font-size: 14px;
+    color: var(--primary-600); /* Blue link */
+    text-decoration: none;
+}
+
+.auth-form a:hover {
+    text-decoration: underline;
+}

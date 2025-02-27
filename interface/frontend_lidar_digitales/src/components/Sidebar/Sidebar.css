@@ -1,6 +1,6 @@
 /* Sidebar */
 .main-container .sidebar {
-    width: clamp(8rem, 25vw, 16rem);
+    width: clamp(8rem, 20vw, 16rem);
     height: calc(100% - 2rem);
     padding: 1rem 0;
     display: flex;
@@ -17,7 +17,7 @@
     display: flex;
     flex-direction: column;
     justify-items: center;
-    /* width: 100%; */
+    width: 70%;
     font-size: 11px;
     padding: 0 1rem;
     padding-bottom: 0.25rem;
@@ -37,6 +37,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    flex: 1;
 }
 .profile-icon-img {
     width: 2rem;

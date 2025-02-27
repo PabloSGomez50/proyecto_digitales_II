@@ -106,10 +106,10 @@
 .header-content > .header-new-duel {
     padding-right: 1.5rem;
     padding-left: 0.5rem;
-    background-color: var(--primary-400);
+    background-color: var(--primary-500);
     color: white;
-    border: 1px solid var(--primary-200);
     cursor: pointer;
+    border: 1px solid var(--primary-200);
 }
 .header-new-duel .icon {
     background-color: transparent;
@@ -124,4 +124,12 @@
 
 .new-duel-container {
     gap: 0.5rem;
+}
+
+.header-time {
+    font-size: 20px;
+    /* padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background-color: var(--primary-200); */
+    /* color: #c3c3c3; */
 }

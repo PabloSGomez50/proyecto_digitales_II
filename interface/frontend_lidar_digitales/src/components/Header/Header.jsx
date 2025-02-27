@@ -1,100 +1,105 @@
 import './Header.css';
 import { FaPlus} from "react-icons/fa6";
 import { FaSearch } from "react-icons/fa";
-// import Modal from '../Modal/Modal';
 import { useEffect, useState } from 'react';
-// import FormContainer from './FormContainer';
+
 import { useUser } from '../../hooks/UserContext';
-import { axiosContent } from '../../axiosInstance';
+import { useDevice } from '../../hooks/DeviceContext';
+
+import Modal from '../Modal/Modal';
+import FormContainer from '../Basic/FormContainer';
 
 
-const Header = ({  }) => {
-    const { user } = useUser();
+const Header = () => {
+    // const { user } = useUser();
+    const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
+    const { device, devices, selectDevice, addDevice } = useDevice();
     const [showModal, setShowModal] = useState(false);
-    const [showDuels, setShowDuels] = useState(false);
-    const [data, setData] = useState([]);
-
-    const handleDuelSelected = (duelSelected) => {
-        setShowDuels(false);
-        setDuelSelected(duelSelected);
-    }
-    
-    const sendData = (e) => {
-        e.preventDefault();
-        const dataToSend = {};
-        data.forEach(item => {
-            dataToSend[item.id] = item.value;
-        });
-        dataToSend.owner_id = user.id;
-        console.log("Data to send: ", dataToSend);
-        const createMatchRq = async (data) => {
-            try {
-                const response = await axiosContent.post('/matches/', data);
-                console.log(response.data);
-            } catch (error) {
-                console.log(error);
-            }
+    const [ShowDevices, setShowDevices] = useState(false);
+    const [data, setData] = useState([
+        {
+            id: "name",
+            name: "Nombre del dispositivo",
+            type: "text",
+            value: "",
+            required: true
+        },
+        {
+            id: "dns_url",
+            name: "Dirección DNS",
+            type: "text",
+            value: "",
+            required: true
+        },
+        {
+            id: "ip",
+            name: "Dirección IP",
+            type: "text",
+            value: ""
         }
-        // createMatchRq(dataToSend);
-        setShowModal(false);
+    ]);
+
+    const handleDropDownSelected = (item) => {
+        setShowDevices(false);
+        selectDevice(item);
     }
 
-    // useEffect(() => {
-    //     setData(prev => {
-    //         return prev.map(item => {
-    //             if (item.id === 'game_id') {
-    //                 return {
-    //                     ...item,
-    //                     options: games
-    //                 }
-    //             }
-    //             return item;
-    //         })
-    //     });
-    // }, [games])
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date().toLocaleTimeString('es-es', { hour12: false }));
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
 
     return (
     <header className='noselect'>
         <div
-            className={`header-title ${duelSelected ? 'selected' : ''}`}
-            onMouseEnter={() => setShowDuels(true)}
-            onMouseLeave={() => setShowDuels(false)}
+            className={`header-title ${device?.id ? 'selected' : ''}`}
+            onMouseEnter={() => setShowDevices(true)}
+            onMouseLeave={() => setShowDevices(false)}
         >
-            {showDuels ?
-                <span>Seleccionar duelo</span>
+            {(ShowDevices || device?.name === undefined)  ?
+                <span>Seleccionar dispositivo</span>
                 :
-                <span>{duelSelected}</span>
+                <span>{device?.name}</span>
             }
             
-          <ul className={`header-duels ${showDuels ? 'show' : ''}`}>
-            {duels.map(item =>
+          <ul className={`header-duels ${ShowDevices ? 'show' : ''}`}>
+            {devices.map(item =>
               <li
-                onClick={() => handleDuelSelected(item)}
-                key={item}
+                key={item.id}
+                onClick={() => handleDropDownSelected(item.id)}
               >
-                {item}
+                {item?.name}
               </li>
             )}
           </ul> 
         </div>
         <div className='header-content'>
-            <div className='searchbar flex'>
-                <FaSearch  className='icon'/>
-                <input type="text" name="search" />
-            </div>
             <button 
                 className='header-new-duel flex'
                 onClick={() => setShowModal(true)}
             >
                 <FaPlus className='icon' />
-                <span>Nuevo duelo</span>
+                <span>Nuevo Dispositivo</span>
             </button>
+            {/* <div className='searchbar flex'>
+                <FaSearch  className='icon'/>
+                <input type="text" name="search" />
+            </div> */}
+
+
+            <div className='header-time'>
+                {currentTime}
+            </div>
             {showModal && 
                 <Modal onClose={() => setShowModal(false)}>
                     <FormContainer
                         data={data}
                         setData={setData}
-                        sendData={sendData}
+                        sendData={addDevice}
+                        onClose={() => setShowModal(false)}
                     />
                 </Modal>
             }

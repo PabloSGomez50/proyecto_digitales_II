@@ -1,4 +1,4 @@
-.rank-table {
+.device-command {
     width: 100%;
     max-height: calc(100% - 2.5rem);
     padding: 1rem 0 1.5rem;
@@ -8,7 +8,7 @@
     flex-direction: column;
 }
 
-.rank-table-header {
+.device-command-header {
     padding: 0 1rem;
     display: flex;
     justify-content: space-between;
@@ -17,8 +17,8 @@
     margin-bottom: 1rem;
 }
 
-.rank-table-header span,
-.rank-table-header button {
+.device-command-header span,
+.device-command-header button {
     background-color: var(--gray-100);
     color: var(--primary-500);
     font-weight: bold;
@@ -26,15 +26,15 @@
     padding: 0.25rem 0.5rem;
 }
 
-.rank-table-header button:hover {
+.device-command-header button:hover {
     background-color: var(--gray-200);
 }
-.rank-table-header button:active {
+.device-command-header button:active {
     color: var(--primary-600);
     background-color: var(--gray-200);
 }
 
-.rank-table-body { 
+.device-command-body { 
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -43,25 +43,25 @@
 }
 
 
-.rank-table-row:first-child {
+.device-command-row:first-child {
     padding: 0.5rem 1rem;
     background-color: var(--gray-100);
 }
 
-.rank-table-row:not(:first-child) {
+.device-command-row:not(:first-child) {
     border-bottom: 1px solid var(--gray-200);
 }
 
-.rank-table-row {
+.device-command-row {
     padding: 0.5rem 1rem;
     display: flex;
     font-size: 14px;
 }
 
-.rank-table-row span {
+.device-command-row span {
     flex: 1;
 }
 
-.rank-table-row span:first-child {
+.device-command-row span:first-child {
     flex: 2;
 }
