@@ -5,10 +5,6 @@
 void init_dc_motor() {
     GPIO_PinInit(GPIO, MOTOR_PORT_1, MOTOR_PIN_1, &out_config_low);
     GPIO_PinInit(GPIO, MOTOR_PORT_2, MOTOR_PIN_2, &out_config_low);
-    GPIO_PinInit(GPIO, MOT_PORT_DIR, MOT_PIN_DIR, &out_config_low);
-    GPIO_PinInit(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, &out_config_low);
-    GPIO_PinInit(GPIO, MOT_PORT_MSLEEP, MOT_PIN_MSLEEP, &out_config_low);
-    GPIO_PinInit(GPIO, MOT_PORT_MRESET, MOT_PIN_MRESET, &out_config_low);
 }
 
 void start_dc_motor(direction_t dir) {
@@ -46,16 +42,13 @@ struct step_seq_t sequence_half_steps[4] = {
 };
 
 void init_bipolar_stepper(direction_t dir) {
-    GPIO_PinInit(GPIO, MOT_PORT_DIR, MOT_PIN_DIR, &out_config);
-    GPIO_PinInit(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, &out_config);
-    GPIO_PinInit(GPIO, MOT_PORT_MSLEEP, MOT_PIN_MSLEEP, &out_config);
+    GPIO_PinInit(GPIO, MOT_PORT_DIR, MOT_PIN_DIR, &out_config_low);
+    GPIO_PinInit(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, &out_config_low);
+    GPIO_PinInit(GPIO, MOT_PORT_MSLEEP, MOT_PIN_MSLEEP, &out_config_low);
     GPIO_PinInit(GPIO, MOT_PORT_MRESET, MOT_PIN_MRESET, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_MS1, MOT_PIN_MS1, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_MS2, MOT_PIN_MS2, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_MS3, MOT_PIN_MS3, &out_config);
-    GPIO_PinWrite(GPIO, MOT_PORT_MRESET, MOT_PIN_MRESET, 1);
-    GPIO_PinWrite(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, 0);
-    GPIO_PinWrite(GPIO, MOT_PORT_MSLEEP, MOT_PIN_MSLEEP, 0);
     set_bipolar_direction(dir);
 }
 

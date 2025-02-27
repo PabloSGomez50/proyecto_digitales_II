@@ -25,10 +25,10 @@ struct step_seq_t {
 
 
 // DC Motor
-#define MOTOR_PORT_1 0
-#define MOTOR_PIN_1 14
-#define MOTOR_PORT_2 0
-#define MOTOR_PIN_2 15
+#define MOTOR_PORT_1    0
+#define MOTOR_PIN_1     8
+#define MOTOR_PORT_2    0
+#define MOTOR_PIN_2     9
 
 void init_dc_motor(void);
 void start_dc_motor(direction_t dir);
