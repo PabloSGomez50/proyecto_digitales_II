@@ -1,3 +1,8 @@
 /armgcc
 /.vscode
 *.cmake
+*-backups
+*fp-info-cache
+*.csv
+*venv/
+*__pycache__/

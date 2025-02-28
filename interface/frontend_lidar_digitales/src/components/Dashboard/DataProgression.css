@@ -1,0 +1,14 @@
+.data-progression {
+    display: flex;
+    padding: 1.5rem;
+    gap: 1.5rem;
+}
+
+.data-progression-header {
+    display: flex;
+    flex-direction: column;
+}
+
+.data-progression-body {
+    flex: 1;
+}

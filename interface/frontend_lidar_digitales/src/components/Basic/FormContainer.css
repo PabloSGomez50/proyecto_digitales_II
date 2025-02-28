@@ -1,0 +1,28 @@
+.carousel-container {
+    gap: 0.25rem;
+}
+
+.carousel-item {
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    border: 1px solid #dee2e6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+}
+
+.carousel-item.active {
+    background-color: var(--primary-400);
+    color: white;
+}
+
+.carousel-item.disabled {
+    background-color: var(--gray-200);
+    cursor: not-allowed;
+}
+
+.form-container > button {
+
+}

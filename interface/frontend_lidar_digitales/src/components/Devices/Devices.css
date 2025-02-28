@@ -1,0 +1,19 @@
+.devices-container {
+    padding: 1rem 2rem 0;
+}
+
+.devices-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    background-color: white;
+    border-radius: 1rem;
+    padding: 1rem;
+}
+
+.device-card:first-child {
+    border-top: none;
+}
+.device-card {
+    border-top: 2px solid var(--gray-100);
+}
