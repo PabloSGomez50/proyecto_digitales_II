@@ -146,7 +146,8 @@ int main(void) {
   }
   
 uint16_t get_mot_angle() {
-  if (!AS5600_ON)
+  // if (!AS5600_ON)
+  if (motor_stepper_mode)
     return mot_angle + MOT_ANGLE_PER_STEP * steps_per_read;
     
   if (refresh_magnet_status()) {

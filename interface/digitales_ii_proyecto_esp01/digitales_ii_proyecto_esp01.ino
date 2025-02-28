@@ -9,8 +9,8 @@
 // Replace with your network credentials
 const char* ssid_ap     = "DII-Access-Point";
 const char* password_ap = "123456789";
-const char* ssid_wifi     = "**********";
-const char* password_wifi = "**********";
+const char* ssid_wifi     = "Telecentro-996b";
+const char* password_wifi = "ZNYUW3MDZDTM";
 
 const char* apDomain = "lidar";
 // Tiempo constantes
@@ -46,6 +46,7 @@ void handleStart();
 void handleIdle();
 void handleBuffer();
 void handleSensor();
+void handleOptions();
 
 
 uint8_t readSerial();
@@ -206,25 +207,41 @@ void connectToWiFi() {
     startAPMode();
   }
 }
-
+void addCORSHeaders() {
+  server.sendHeader("Access-Control-Allow-Origin", "*"); // Allow all origins
+  server.sendHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+}
 // Routers
 void setupServerRoutes() {
   server.on("/", HTTP_GET, handleRoot);
+  server.on("/", HTTP_OPTIONS, handleOptions);  // Handle preflight
+
   server.on("/msg", HTTP_POST, handleMessage);
+  server.on("/msg", HTTP_OPTIONS, handleOptions);
+
   server.on("/active", HTTP_POST, handleStart);
+  server.on("/active", HTTP_OPTIONS, handleOptions);
+
   server.on("/idle", HTTP_POST, handleIdle);
+  server.on("/idle", HTTP_OPTIONS, handleOptions);
+
   server.on("/buffer", HTTP_GET, handleBuffer);
+  server.on("/buffer", HTTP_OPTIONS, handleOptions);
+
   server.on("/sensor", HTTP_GET, handleSensor);
+  server.on("/sensor", HTTP_OPTIONS, handleOptions);
   server.begin();
 }
 
 void handleRoot() {
   String text = "Esp01 Server activo en ip: " + ipaddress + ", Necesitaas mas informacion?";
 
+  addCORSHeaders();
   server.send(200, "text/plain", text);
 }
 
-void handleSensor() { 
+void handleSensor() {
   DynamicJsonDocument doc(1024);
 
   JsonArray distanceArray = doc.createNestedArray("distance");
@@ -241,10 +258,12 @@ void handleSensor() {
   // Send JSON response
   String response;
   serializeJson(doc, response);
+  addCORSHeaders();
   server.send(200, "application/json", response);
 }
 
 void handleMessage() {
+  addCORSHeaders();
   if (!server.hasArg("plain")) {
     server.send(400, "application/json", R"({"error": "Invalid request"})");
     return;
@@ -274,10 +293,12 @@ void handleMessage() {
 }
 
 void handleBuffer() {
+  addCORSHeaders();
   server.send(200, "application/json", "{\"status\": \"Buffer with len " + String(strlen(buffer)) + "\", \"buffer\": \"" + String(buffer) + "\"}");
 }
 
 void handleStart() {
+  addCORSHeaders();
   Serial.write("ACTIVE\n", 7);
 
   if (readSerial() == 1)
@@ -287,10 +308,15 @@ void handleStart() {
 }
 
 void handleIdle() {
+  addCORSHeaders();
   Serial.write("IDLE\n", 5);
-  
   if (readSerial() == 1)
     server.send(200, "application/json", "{\"status\": \"LPC845 stopped\", \"msg\": \"" + String(buffer) + "\"}");
   else
     server.send(200, "application/json", "{\"status\": \"LPC845 stopped wo msg\"}");
+}
+
+void handleOptions() {
+  addCORSHeaders();
+  server.send(204);
 }

@@ -41,6 +41,11 @@
     outline: none;
 }
 
+.dashboard-header .small-icon.pointer {
+    
+}
+
+
 /* Data container */
 
 .dashboard-data {

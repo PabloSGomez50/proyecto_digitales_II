@@ -1,7 +1,6 @@
 .data-progression {
     display: flex;
-    padding: 1.5rem;
-    gap: 1.5rem;
+    padding: 1rem;
 }
 
 .data-progression-header {
@@ -11,4 +10,11 @@
 
 .data-progression-body {
     flex: 1;
+}
+
+.data-progression-options {
+    margin: 1rem 0;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
 }
