@@ -4,7 +4,6 @@ uint8_t magnet_status, md, ml, mh, buffer_as6500[3];
 
 
 void init_as5600_dir() {
-    // GPIO_PortInit(GPIO, AS5600_DIR_PORT);
     GPIO_PinInit(GPIO, AS5600_DIR_PORT, AS5600_DIR_PIN, &out_config);
 }
 

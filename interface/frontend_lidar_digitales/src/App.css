@@ -1,0 +1,64 @@
+#root {
+  text-align: left;
+}
+
+img {
+  width: 8rem;
+}
+
+.main-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  background-color: var(--background-light);
+}
+
+/* Main components */
+.main-container > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.main-content {
+  flex: 1;
+  background-color: var(--gray-100);
+  overflow: hidden;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.loader {
+  border: 8px solid var(--primary-200);
+  border-top: 8px solid var(--primary-400);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.dev-active {
+  opacity: 0.8;
+  color: green;
+  font-weight: bold;
+}
+
+.dev-inactive {
+  opacity: 0.8;
+  color: red;
+  font-weight: bold;
+}

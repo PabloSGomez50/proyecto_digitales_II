@@ -1,14 +1,9 @@
 #include "motors.h"
 
 // DC Motor
-
 void init_dc_motor() {
     GPIO_PinInit(GPIO, MOTOR_PORT_1, MOTOR_PIN_1, &out_config_low);
     GPIO_PinInit(GPIO, MOTOR_PORT_2, MOTOR_PIN_2, &out_config_low);
-    GPIO_PinInit(GPIO, MOT_PORT_DIR, MOT_PIN_DIR, &out_config_low);
-    GPIO_PinInit(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, &out_config_low);
-    GPIO_PinInit(GPIO, MOT_PORT_MSLEEP, MOT_PIN_MSLEEP, &out_config_low);
-    GPIO_PinInit(GPIO, MOT_PORT_MRESET, MOT_PIN_MRESET, &out_config_low);
 }
 
 void start_dc_motor(direction_t dir) {
@@ -25,8 +20,8 @@ void stop_dc_motor() {
     GPIO_PinWrite(GPIO, MOTOR_PORT_1, MOTOR_PIN_1, 0);
     GPIO_PinWrite(GPIO, MOTOR_PORT_2, MOTOR_PIN_2, 0);
 }
-// Stepper
 
+// Stepper Motor
 struct step_seq_t sequence_full_steps[8] = {
     {1, 0, 0, 0},
     {0, 1, 0, 0},
@@ -46,16 +41,13 @@ struct step_seq_t sequence_half_steps[4] = {
 };
 
 void init_bipolar_stepper(direction_t dir) {
-    GPIO_PinInit(GPIO, MOT_PORT_DIR, MOT_PIN_DIR, &out_config);
-    GPIO_PinInit(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, &out_config);
-    GPIO_PinInit(GPIO, MOT_PORT_MSLEEP, MOT_PIN_MSLEEP, &out_config);
+    GPIO_PinInit(GPIO, MOT_PORT_DIR, MOT_PIN_DIR, &out_config_low);
+    GPIO_PinInit(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, &out_config_low);
+    GPIO_PinInit(GPIO, MOT_PORT_MSLEEP, MOT_PIN_MSLEEP, &out_config_low);
     GPIO_PinInit(GPIO, MOT_PORT_MRESET, MOT_PIN_MRESET, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_MS1, MOT_PIN_MS1, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_MS2, MOT_PIN_MS2, &out_config);
     GPIO_PinInit(GPIO, MOT_PORT_MS3, MOT_PIN_MS3, &out_config);
-    GPIO_PinWrite(GPIO, MOT_PORT_MRESET, MOT_PIN_MRESET, 1);
-    GPIO_PinWrite(GPIO, MOT_PORT_STEP, MOT_PIN_STEP, 0);
-    GPIO_PinWrite(GPIO, MOT_PORT_MSLEEP, MOT_PIN_MSLEEP, 0);
     set_bipolar_direction(dir);
 }
 
@@ -68,7 +60,6 @@ void init_unipolar_stepper() {
 }
 
 void set_bipolar_direction(direction_t dir){
-    // Set direction
     GPIO_PinWrite(GPIO, MOT_PORT_DIR, MOT_PIN_DIR, dir);
 }
 
@@ -179,24 +170,15 @@ void test_bipolar_stepper() {
 
         last_step = GPIO_PinRead(GPIO, MOT_PORT_STEP, MOT_PIN_STEP);
         if (test_mode == 0) {
-            // W_LED_RED(0);
-            // W_LED_BLUE(1);
-            // W_LED_GREEN(1);
             if (last_state != test_state) {
                 move_bipolar_angle(MOT_ANGLE_PER_STEP * 10);
                 last_state = test_state;
             }
         }
         else if (test_mode == 1) {
-            // W_LED_RED(1);
-            // W_LED_BLUE(0);
-            // W_LED_GREEN(1);
             make_bipolar_step();
         }
         else if (test_mode == 2) {
-            // W_LED_RED(1);
-            // W_LED_BLUE(1);
-            // W_LED_GREEN(0);
             stop_stepper();
             if (last_state != test_state) {
                 if (dir == CW)
