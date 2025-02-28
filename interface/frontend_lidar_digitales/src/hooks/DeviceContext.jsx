@@ -20,13 +20,14 @@ export const DeviceProvider = ({ children }) => {
   ]);
   // const navigate = useNavigate();
 
-  const getDeviceIP = (dns_url) => {
+  const getDeviceIP = (id) => {
     const requestIP = async () => {
       try {
-        // const device = devices.find(device => device.id === id);
-        // if (device.ip) {
-        //   return device.ip;
-        // }
+        const device_selected = devices.find(device => device.id === id);
+        const dns_url = device_selected.dns_url;
+        if (device_selected.ip) {
+          return;
+        }
         console.log("DNS dir to send: ", dns_url);
         const response = await axios.get(`http://${dns_url}/`);
         // Response example: Esp01 Server activo en ip: 192.168.10.161, Necesitaas
@@ -36,7 +37,7 @@ export const DeviceProvider = ({ children }) => {
         const ip = response.data.match(IP_REGEX)[0];
         console.log(response.data, ip);
         if (!ip)
-          return ;
+          return;
         setDevices(prev => {
           return prev.map(dev => {
             if (dev.id === id) {
@@ -53,16 +54,13 @@ export const DeviceProvider = ({ children }) => {
     requestIP();
   }
 
-  // useEffect(() => {
-  //   setDevices(prev => prev.map(device => {
-  //     if (device.ip) {
-  //       return device;
-  //     }
-  //     device.ip = getDeviceIP(device.dns_url);
-  //     return device;
-  //   })) 
-
-  // }, [])
+  useEffect(() => {
+    devices.forEach(device => {
+      if (!device.ip) {
+        getDeviceIP(device.id);
+      }
+    });
+  }, [])
 
   const addDevice = (device) => {
     device.id = devices.reduce((acc, dev) => (dev.id > acc) ? dev.id : acc, 0) + 1;
@@ -79,8 +77,24 @@ export const DeviceProvider = ({ children }) => {
     setDevice(device);
   }
 
+  const updateDeviceData = (id, newData) => {
+    setDevices(prev => {
+      return prev.map(dev => {
+        if (dev.id === id) {
+          dev.data = newData;
+        }
+        return dev;
+      });
+    });
+    if (device.id === id) {
+      setDevice(prev => {
+        return {...prev, data: newData};
+      });
+    }
+  }
+
   return (
-    <DeviceContext.Provider value={{ device, devices, addDevice, selectDevice }}>
+    <DeviceContext.Provider value={{ device, devices, addDevice, selectDevice, updateDeviceData }}>
       {children}
     </DeviceContext.Provider>
   );

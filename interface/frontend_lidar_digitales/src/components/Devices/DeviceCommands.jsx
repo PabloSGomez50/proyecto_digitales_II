@@ -6,14 +6,94 @@ import { useDevice } from "../../hooks/DeviceContext";
 
 const DeviceCommands = ({row, column}) => {
     const [stepsPerRead, setStepsPerRead] = useState(0);
-    const [batteryLevel, setBatteryLevel] = useState(0);
-    const [motorMode, setMotorMode] = useState(0);
-    const [angleValue, setAngleValue] = useState();
+    const [motorMode, setMotorMode] = useState("STEPPER_MOTOR");
 
-    const { device } = useDevice();
+    const { device, updateDeviceData } = useDevice();
 
-    const handleMotorMode = (e) => {
-        setMotorMode(e.target.value);
+    const url_create = () => {
+        if (device.ip)
+            return `http://${device.ip}`;
+        else
+            return `http://${device.dns_url}`;
+
+    }
+
+    const handleSendStatus = async () => {
+        console.log("Sending status");
+        console.log("Device: ", device.ip, device.dns_url);
+        try {
+            const url = url_create();
+            console.log("URL to send status: ", url);
+            const response = await axios.post(`${url}/msg`, {
+                "message": `STATUS\n`
+            });
+            console.log("Response from send status: ", response.data);
+            // Format: "Status alive, steps: %d, mode: %d\r\n"
+        } catch (err) {
+            console.error(err);
+            return ;
+        }
+        setTimeout(async () => {
+            try {
+            let url;
+            if (device.ip)
+                url = `http://${device.ip}/buffer`;
+            else
+                url = `http://${device.dns_url}/buffer`;
+            const response = await axios.get(url);
+            console.log("Response from second request: ", response.data);
+            const steps = response.data.buffer.match(/steps: (\d+)/);
+            const mode = response.data.buffer.match(/mode: (\d+)/);
+            if (!steps && !mode) {
+                return;
+            }
+            updateDeviceData(device.id, {
+                ...device.data,
+                steps_per_read: steps ? parseInt(steps[1]) : undefined,
+                mode: mode ? (parseInt(mode[1]) ? "Motor paso a paso" : "Motor de continua" ) : undefined
+            }
+            );
+            } catch (err) {
+            console.error(err);
+            }
+        }, 500);
+    }
+
+    const handlesendBattery = async () => {
+        console.log("Sending Battery");
+        console.log("Device: ", device.ip, device.dns_url);
+        try {
+            const url = url_create();
+            console.log("URL to send status: ", url);
+            const response = await axios.post(`${url}/msg`, {
+                "message": `BATTERY\n`
+            });
+            console.log("Response from query battery: ", response.data);
+        } catch (err) {
+            console.error(err);
+            return ;
+        }
+        setTimeout(async () => {
+            try {
+            let url;
+            if (device.ip)
+                url = `http://${device.ip}/buffer`;
+            else
+                url = `http://${device.dns_url}/buffer`;
+            const response = await axios.get(url);
+            console.log("Response from second request: ", response.data);
+            // "Battery level: %u,%u\r\n"
+            const battery = response.data.buffer.match(/Battery level: (\d+),(\d+)/);
+            if (battery) {
+                updateDeviceData(device.id, {
+                    ...device.data,
+                    battery: parseFloat(`${battery[1]}.${battery[2]}`)
+                });
+            }
+            } catch (err) {
+            console.error(err);
+            }
+        }, 500);
     }
 
     const handleStepsPerRead = (e) => {
@@ -30,21 +110,19 @@ const DeviceCommands = ({row, column}) => {
     }
 
     const handleSendSteps = async () => {
+        console.log("Device: ", device.ip, device.dns_url);
         if (stepsPerRead === 0) {
             return;
         }
         try {
-            let url;
-            if (device.ip)
-                url = `http://${device.ip}/msg`;
-            else
-                url = `http://${device.dns_url}/msg`;
-            const response = await axios.post(url, {
+            const url = url_create();
+            console.log("URL to send Steps: ", url);
+            const response = await axios.post(`${url}/msg`, {
                 "message": `M${stepsPerRead}.\n`
             });
             console.log("Response from send steps: ", response.data);
         } catch (err) {
-            console.log(err);
+            console.error(err);
             return ;
         }
         setTimeout(async () => {
@@ -56,28 +134,30 @@ const DeviceCommands = ({row, column}) => {
                 url = `http://${device.dns_url}/buffer`;
             const response = await axios.get(url);
             console.log("Response from second request: ", response.data);
+            // example "Resize steps per read: %i\r\n"
+            const steps = response.data.buffer.match(/Resize steps per read: (\d+)/);
+            if (steps) {
+                updateDeviceData(device.id, {
+                    ...device.data,
+                    steps_per_read: parseInt(steps[1])
+                });
+            }
             } catch (err) {
-            console.log(err);
+            console.error(err);
             }
         }, 500);
     }
 
-    const handleSendStatus = async () => {
-        console.log("Sending status");
-        console.log("Device: ", device.ip, device.dns_url);
+    const handleSendMode = async () => {
         try {
-            let url;
-            if (device.ip)
-                url = `http://${device.ip}/msg`;
-            else
-                url = `http://${device.dns_url}/msg`;
-            console.log("URL to send status: ", url);
-            const response = await axios.post(url, {
-                "message": `STATUS\n`
+            const url = url_create();
+            console.log("URL to send Mode: ", url);
+            const response = await axios.post(`${url}/msg`, {
+                "message": `${motorMode}\n`
             });
-            console.log("Response from send status: ", response.data);
+            console.log("Response from send mode: ", response.data);
         } catch (err) {
-            console.log(err);
+            console.error(err);
             return ;
         }
         setTimeout(async () => {
@@ -89,8 +169,93 @@ const DeviceCommands = ({row, column}) => {
                 url = `http://${device.dns_url}/buffer`;
             const response = await axios.get(url);
             console.log("Response from second request: ", response.data);
+            // "Stepper mode: %i\r\n"
+            const mode = response.data.buffer.match(/Stepper mode: (\d+)/);
+            if (mode) {
+                if (mode[1] === "0") {
+                    updateDeviceData(device.id, {
+                        ...device.data,
+                        mode: "Motor de continua"
+                    });
+                } else {
+                    updateDeviceData(device.id, {
+                        ...device.data,
+                        mode: "Motor paso a paso"
+                    });
+                }
+            }
             } catch (err) {
-            console.log(err);
+            console.error(err);
+            }
+        }, 500);
+    }
+
+    const handleSendReset = async () => {
+        try {
+            const url = url_create();
+            console.log("URL to send Reset: ", url);
+            const response = await axios.post(`${url}/msg`, {
+                "message": `RESET\n`
+            });
+            console.log("Response from send reset: ", response.data);
+        } catch (err) {
+            console.error(err);
+            return ;
+        }
+        setTimeout(async () => {
+            try {
+            let url;
+            if (device.ip)
+                url = `http://${device.ip}/buffer`;
+            else
+                url = `http://${device.dns_url}/buffer`;
+            const response = await axios.get(url);
+            console.log("Response from second request: ", response.data);
+            // Example "Reset motor angle\r\n"
+            const reset = response.data.buffer.match(/Reset motor angle/);
+            if (reset) {
+                updateDeviceData(device.id, {
+                    ...device.data,
+                    angle: 0
+                });
+            }
+            } catch (err) {
+            console.error(err);
+            }
+        }, 500);
+    }
+
+    const handleSendAngle = async () => {
+        try {
+            const url = url_create();
+            console.log("URL to send Angle: ", url);
+            const response = await axios.post(`${url}/msg`, {
+                "message": `ANGLE\n`
+            });
+            console.log("Response from send reset: ", response.data);
+        } catch (err) {
+            console.error(err);
+            return ;
+        }
+        setTimeout(async () => {
+            try {
+            let url;
+            if (device.ip)
+                url = `http://${device.ip}/buffer`;
+            else
+                url = `http://${device.dns_url}/buffer`;
+            const response = await axios.get(url);
+            console.log("Response from second request: ", response.data);
+            // Example: "Current angle: %i\r\n"
+            const angle = response.data.buffer.match(/Current angle: (\d+)/);
+            if (angle) {
+                updateDeviceData(device.id, {
+                    ...device.data,
+                    angle: parseInt(angle[1]) / 10
+                });
+            }
+            } catch (err) {
+            console.error(err);
             }
         }, 500);
     }
@@ -108,49 +273,66 @@ const DeviceCommands = ({row, column}) => {
                     <span></span>
                     <span>ESTADO</span>
                 </div>
-                <div className="device-command-row">
-                    <label>Actaulizar información:</label>
-                    <div/>
-                    <button className="btn" onClick={handleSendStatus}>Actualizar</button>
-                    <div></div>
+                {device?.name ? (
+                <>
+                    <div className="device-command-row">
+                        <label>Actaulizar información:</label>
+                        <div/>
+                        <button className="btn" onClick={handleSendStatus}>Actualizar</button>
+                        <div></div>
+                    </div>
+                    <div className="device-command-row">
+                        <label>Nivel de bateria:</label>
+                        <div/>
+                        <button className="btn" onClick={handlesendBattery}>Actualizar</button>
+                        <span>{device?.data?.battery ? device?.data?.battery + "%": "No disponible"}</span>
+                    </div>
+                    <div className="device-command-row">
+                        <label>Angulo Actual:</label>
+                        <button className="btn" onClick={handleSendReset}>Reiniciar</button>
+                        <button className="btn" onClick={handleSendAngle}>Actualizar</button>
+                        <span>{device?.data?.angle !== undefined ? (device.data.angle % 360) + "°": "No disponible"}</span>
+                    </div>
+                    <div className="device-command-row">
+                        <label htmlFor="stepPerRead">Pasos por lectura:</label>
+                        <input
+                            id="stepPerRead"
+                            value={stepsPerRead}
+                            onChange={handleStepsPerRead}
+                            type="text"
+                            placeholder="Pasos por lectura"
+                        />
+                        <button className="btn" onClick={handleSendSteps}>Enviar</button>
+                        <div></div>
+                    </div>
+                    <div className="device-command-row">
+                        <label htmlFor="motorMode">Cambiar modo de motor:</label>
+                        <select
+                            id="motorMode"
+                            value={motorMode}
+                            onChange={(e) => setMotorMode(e.target.value)}
+                        >
+                            <option value="STEPPER_MOTOR">Modo Stepper</option>
+                            <option value="DC_MOTOR">Modo DC</option>
+                        </select>
+                        <button
+                            className="btn"
+                            onClick={handleSendMode}
+                        >Enviar</button>
+                        <div></div>
+                    </div>
+                </>
+                )
+                :
+                <div style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100%"
+                }}>
+                    <p>Se debe seleccionar un dispositivo</p>
                 </div>
-                <div className="device-command-row">
-                    <label>Nivel de bateria:</label>
-                    <div/>
-                    <button className="btn">Actualizar</button>
-                    <span>{batteryLevel ? batteryLevel + "%": "No disponible"}</span>
-                </div>
-                <div className="device-command-row">
-                    <label>Angulo Actual:</label>
-                    <button className="btn">Reiniciar</button>
-                    <button className="btn">Actualizar</button>
-                    <span>{angleValue !== undefined ? angleValue + "°": "No disponible"}</span>
-                </div>
-                <div className="device-command-row">
-                    <label htmlFor="stepPerRead">Pasos por lectura:</label>
-                    <input
-                        id="stepPerRead"
-                        value={stepsPerRead}
-                        onChange={handleStepsPerRead}
-                        type="text"
-                        placeholder="Pasos por lectura"
-                    />
-                    <button className="btn" onClick={handleSendSteps}>Enviar</button>
-                    <div></div>
-                </div>
-                <div className="device-command-row">
-                    <label htmlFor="motorMode">Cambiar modo de motor:</label>
-                    <select
-                        id="motorMode"
-                        value={motorMode}
-                        onChange={handleMotorMode}
-                    >
-                        <option value="0">Modo Stepper</option>
-                        <option value="1">Modo DC</option>
-                    </select>
-                    <button className="btn">Enviar</button>
-                    <div></div>
-                </div>
+                }
                 
                 {/* 
                 {data.map((user, index) => (
