@@ -13,7 +13,7 @@ import Devices from './components/Devices/Devices';
 
 const sidebarOptions = [
   {name: "Dashboard", icon: MdDashboard}, 
-  {name: "Devices", icon: FaDatabase},
+  // {name: "Devices", icon: FaDatabase},
   // {name: "Games", icon: GiDuel},
   // {name: "Events", icon: GiDuel},
 ];

@@ -45,9 +45,9 @@ void stop_dc_motor(void);
 #define MOT_PORT_B2 0
 #define MOT_PIN_B2  15
 
-#define MOT_STEPS_PER_REV 230
+#define MOT_STEPS_PER_REV 200
 #define MOT_ANGLE_PER_STEP 3600 / MOT_STEPS_PER_REV
-#define MOT_STEP_TIME 30
+#define MOT_STEP_TIME 5
 #define MOT_RATIO 2
 
 #define MOT_PORT_STEP   0

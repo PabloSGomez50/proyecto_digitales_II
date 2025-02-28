@@ -85,9 +85,11 @@ const DeviceCommands = ({row, column}) => {
             // "Battery level: %u,%u\r\n"
             const battery = response.data.buffer.match(/Battery level: (\d+),(\d+)/);
             if (battery) {
+                const battery_voltaje = parseFloat(`${battery[1]}.${battery[2]}`);
+                console.log("Voltaje:", battery_voltaje);
                 updateDeviceData(device.id, {
                     ...device.data,
-                    battery: parseFloat(`${battery[1]}.${battery[2]}`)
+                    battery: battery_voltaje
                 });
             }
             } catch (err) {

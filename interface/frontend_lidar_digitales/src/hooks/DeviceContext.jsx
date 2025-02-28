@@ -11,7 +11,7 @@ export const DeviceProvider = ({ children }) => {
   const [device, setDevice] = useState({}); // user can be null, or user data
   const [devices, setDevices] = useState([
     {id: 1, name: 'Lidar TDII AP', dns_url: 'lidar.local', 
-      ip: "192.168.10.161", data: {}, active: false, 
+      ip: undefined, data: {active: false}, 
       points: {
         "distance": [20, 25, 45, 80, 80, 80, 40],
         "mot_angle": [0, 0, 450, 900, 1350, 1800, 2250],
@@ -42,11 +42,11 @@ export const DeviceProvider = ({ children }) => {
           return prev.map(dev => {
             if (dev.id === id) {
               dev.ip = ip;
+              dev.data = {...dev.data, active: true};
             }
             return dev;
           });
         });
-        return ip;
       } catch (error) {
         console.log("getDeviceIP: ", error);
       }
@@ -93,8 +93,14 @@ export const DeviceProvider = ({ children }) => {
     }
   }
 
+  const getDeviceUrl = () => {
+    if (device.ip)
+      return `http://${device.ip}`;
+    return `http://${device.dns_url}`;
+  }
+
   return (
-    <DeviceContext.Provider value={{ device, devices, addDevice, selectDevice, updateDeviceData }}>
+    <DeviceContext.Provider value={{ device, devices, addDevice, selectDevice, updateDeviceData, getDeviceUrl, getDeviceIP }}>
       {children}
     </DeviceContext.Provider>
   );

@@ -17,19 +17,28 @@ import DeviceCommands from "../Devices/DeviceCommands";
 const Dashboard = () => {
     
     const { user } = useUser();
-    const { device } = useDevice();
+    const { device, getDeviceUrl, getDeviceIP, updateDeviceData } = useDevice();
 
     const handleCheckDevice = async () => {
+        console.log("Check Device: ", device);
+        getDeviceIP(device.id);
+        console.log("Device IP: ", device.ip);
         try {
-            let url;
-            if (device.ip)
-                url = `http://${device.ip}/`;
-            else
-                url = `http://${device.dns_url}/`;
+            const url = getDeviceUrl();
             const response = await axios.get(url);
             console.log("Response from check device: ", response.data);
+            //"Esp01 Server activo en ip: {ipaddress}, Necesitaas mas informacion?
+            const ip = response.data?.match(/(\d{1,3}\.){3}\d{1,3}/)[0];
+            console.log("IP: ", ip);
+
+            if (ip) {
+                updateDeviceData(device.id, {...device.data, active: true});
+            } else {
+                updateDeviceData(device.id, {...device.data, active: false});
+            }
         } catch (err) {
             console.log(err);
+            updateDeviceData(device.id, {...device.data, active: false});
             return ;
         }
     }
@@ -42,17 +51,17 @@ const Dashboard = () => {
                     <img src={user?.profile_img || WilliamsLogo} className='profile-icon-img' alt='Page icon'/>
                     <p>{user?.email}</p>
                 </div>
-                <div className="dashboard-status">
+                <div className="gap-0-5 flex">
                     {device?.name ?
                     <>
                         <span>Estado de {device.name}: </span>
-                        {device?.active ? 
+                        {device?.data?.active ? 
                         <span className='dev-active'>Activo</span>
                         :
                         <span className='dev-inactive'>Inactivo</span>
                         }
                         
-                        <IoReloadCircle className="small-icon" onClick={handleCheckDevice}/>
+                        <IoReloadCircle className="small-icon pointer" onClick={handleCheckDevice}/>
                     </>
                     :
                     <span>Seleccionar un dispositivo en el Header</span>
@@ -63,8 +72,8 @@ const Dashboard = () => {
             <div
                 className="dashboard-data"
                 style={{
-                    gridTemplateColumns: "repeat(5, 1fr)",
-                    gridTemplateRows: "repeat(4, 1fr)"
+                    gridTemplateColumns: "repeat(4, 1fr)",
+                    gridTemplateRows: "repeat(5, 8rem)"
                 }}
             >
                 <DataChip
@@ -93,8 +102,8 @@ const Dashboard = () => {
                 />
 
                 <DataProgression
-                    data={device?.points}
-                    row={"1 / 5"}
+                    // data={device?.points}
+                    row={"1 / 6"}
                     column={"3 / 7"}
                 />
                 {/* <DataChip
@@ -111,7 +120,7 @@ const Dashboard = () => {
                 /> */}
                 <DeviceCommands
                     data={device?.data?.ranking || []}
-                    row={"3 / 5"}
+                    row={"3 / 6"}
                     column={"1 / 3"}
                 />
                 {/*
