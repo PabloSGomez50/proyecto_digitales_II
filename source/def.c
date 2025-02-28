@@ -1,7 +1,6 @@
 #include "def.h"
 
-
-volatile uint32_t flag_tick_delay = 0;
+volatile uint32_t flag_tick_main = 0;
 volatile uint32_t flag_tick_boton = 0;
 volatile uint32_t flag_tick_usart = 0;
 volatile uint32_t ref_tick;
@@ -15,6 +14,7 @@ gpio_pin_config_t out_config_low = {kGPIO_DigitalOutput, 0};
 
 gpio_pin_config_t in_config = {kGPIO_DigitalInput};
 
+adc_result_info_t adcResultInfoStruct;
 
 void init_systick(uint16_t div) {
 	(void) SysTick_Config(SystemCoreClock/div);
@@ -23,9 +23,9 @@ void init_systick(uint16_t div) {
 
 void SysTick_Handler(void)
 {
-	if (flag_tick_delay >= 4294900000)
-		flag_tick_delay = 0;
-	flag_tick_delay++;
+	if (flag_tick_main >= 4294900000)
+		flag_tick_main = 0;
+	flag_tick_main++;
 	flag_tick_usart++;
 	flag_tick_boton++;
 }
@@ -61,16 +61,16 @@ void init_gpio(void) {
 	
     GPIO_PortInit(GPIO, 0);
     GPIO_PortInit(GPIO, 1);
-    // GPIO_PinInit(GPIO, 1, RED_PIN, &out_config);
-    // GPIO_PinInit(GPIO, 1, GREEN_PIN, &out_config);
-    // GPIO_PinInit(GPIO, 1, BLUE_PIN, &out_config);
+    GPIO_PinInit(GPIO, 1, RED_PIN, &out_config);
+    GPIO_PinInit(GPIO, 1, GREEN_PIN, &out_config);
+    GPIO_PinInit(GPIO, 1, BLUE_PIN, &out_config);
     GPIO_PinInit(GPIO, 0, USR_BTN, &in_config);
     GPIO_PinInit(GPIO, 0, ISP_BTN, &in_config);
 }
 
 void delay_mseg(uint16_t mseg){
-	ref_tick = flag_tick_delay + mseg;
-	while(flag_tick_delay <= ref_tick);
+	ref_tick = flag_tick_main + mseg;
+	while(flag_tick_main <= ref_tick);
 }
 
 void init_i2c1(uint8_t pin_scl, uint8_t pin_sda, uint32_t baudRate, uint32_t frecuency) {
@@ -160,7 +160,6 @@ void lectura_boton (uint8_t puerto, uint8_t boton, estado_boton_t *estado){
  * Inicialización USART
  * Se configura el puerto USART y se activa la interrupción
  */
-
 void init_SWM_USART(USART_Type * port, uint8_t rx, uint8_t tx) {
 	USART_Type * p_port;
 	uint8_t p_tx;
@@ -238,8 +237,8 @@ void init_adc() {
 
     CLOCK_DisableClock(kCLOCK_Swm);
 	POWER_DisablePD(kPDRUNCFG_PD_ADC0);
-    uint16_t frequency = CLOCK_GetFreq(kCLOCK_Fro) / CLOCK_GetClkDivider(kCLOCK_DivAdcClk);
-    (void) ADC_DoSelfCalibration(ADC0, frequency);
+    // uint16_t frequency = CLOCK_GetFreq(kCLOCK_Fro) / CLOCK_GetClkDivider(kCLOCK_DivAdcClk);
+    // (void) ADC_DoSelfCalibration(ADC0, frequency);
     
 	adc_config_t adcConfigStruct;
     adcConfigStruct.clockMode = kADC_ClockSynchronousMode;
@@ -266,5 +265,5 @@ uint16_t get_battery_level() {
 		delay_mseg(5);
 	}
 	ADC_DoSoftwareTriggerConvSeqA(ADC0);
-	return (uint16_t) adcResultInfoStruct.result;
+	return (uint16_t) ((adcResultInfoStruct.result * MAX_BATTERY) / TOTAL_ADC_BITS);
 }
