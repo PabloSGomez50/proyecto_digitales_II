@@ -9,8 +9,8 @@
 // Replace with your network credentials
 const char* ssid_ap     = "DII-Access-Point";
 const char* password_ap = "123456789";
-const char* ssid_wifi     = "Telecentro-996b";
-const char* password_wifi = "ZNYUW3MDZDTM";
+const char* ssid_wifi     = "**********";
+const char* password_wifi = "**********";
 
 const char* apDomain = "lidar";
 // Tiempo constantes
@@ -112,14 +112,14 @@ uint8_t readSerial() {
     yield(); // Avoid watchdog reset
   }
 
-  usart_index = 0;  // Reset on timeout
-  return 0;     // No complete message received
+  usart_index = 0;
+  return 0;
 }
 
 
 struct laser_data parseData() {
   struct laser_data content;
-    if (buffer[0] != '$') {
+  if (buffer[0] != '$') {
     return content;
   }
 

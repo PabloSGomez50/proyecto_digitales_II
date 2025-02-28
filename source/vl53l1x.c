@@ -36,7 +36,7 @@ void init_vl53l1x(uint16_t dev, uint16_t mode) {
 laser_data_t get_data_laser(uint16_t dev) {
     uint8_t status;
 
-    laser_data_t data;
+    laser_data_t data = {0};
     uint8_t error_count = 0;
     status = VL53L1X_CheckForDataReady(dev, &data.ready);
     while (!data.ready && error_count < 20) {
