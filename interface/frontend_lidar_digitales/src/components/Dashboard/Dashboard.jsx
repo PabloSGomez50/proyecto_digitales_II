@@ -19,6 +19,21 @@ const Dashboard = () => {
     const { user } = useUser();
     const { device } = useDevice();
 
+    const handleCheckDevice = async () => {
+        try {
+            let url;
+            if (device.ip)
+                url = `http://${device.ip}/`;
+            else
+                url = `http://${device.dns_url}/`;
+            const response = await axios.get(url);
+            console.log("Response from check device: ", response.data);
+        } catch (err) {
+            console.log(err);
+            return ;
+        }
+    }
+
 
     return (
         <section className='dashboard-container'>
@@ -37,7 +52,7 @@ const Dashboard = () => {
                         <span className='dev-inactive'>Inactivo</span>
                         }
                         
-                        <IoReloadCircle className="small-icon" />
+                        <IoReloadCircle className="small-icon" onClick={handleCheckDevice}/>
                     </>
                     :
                     <span>Seleccionar un dispositivo en el Header</span>

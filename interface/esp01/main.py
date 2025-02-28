@@ -3,8 +3,8 @@ import time
 import json
 import pandas as pd
 
-url = "http://192.168.4.1/" 
-# url = "http://192.168.10.161/" 
+# url = "http://192.168.4.1/" 
+url = "http://192.168.10.161/" 
 # url = "http://lidar.local/"
 
 def rq_get(path=None, output=False):

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import "./DeviceCommands.css";
+import axios from "axios";
+import { useDevice } from "../../hooks/DeviceContext";
 
 
 const DeviceCommands = ({row, column}) => {
@@ -7,6 +9,8 @@ const DeviceCommands = ({row, column}) => {
     const [batteryLevel, setBatteryLevel] = useState(0);
     const [motorMode, setMotorMode] = useState(0);
     const [angleValue, setAngleValue] = useState();
+
+    const { device } = useDevice();
 
     const handleMotorMode = (e) => {
         setMotorMode(e.target.value);
@@ -24,6 +28,74 @@ const DeviceCommands = ({row, column}) => {
             setStepsPerRead(0);
         }
     }
+
+    const handleSendSteps = async () => {
+        if (stepsPerRead === 0) {
+            return;
+        }
+        try {
+            let url;
+            if (device.ip)
+                url = `http://${device.ip}/msg`;
+            else
+                url = `http://${device.dns_url}/msg`;
+            const response = await axios.post(url, {
+                "message": `M${stepsPerRead}.\n`
+            });
+            console.log("Response from send steps: ", response.data);
+        } catch (err) {
+            console.log(err);
+            return ;
+        }
+        setTimeout(async () => {
+            try {
+            let url;
+            if (device.ip)
+                url = `http://${device.ip}/buffer`;
+            else
+                url = `http://${device.dns_url}/buffer`;
+            const response = await axios.get(url);
+            console.log("Response from second request: ", response.data);
+            } catch (err) {
+            console.log(err);
+            }
+        }, 500);
+    }
+
+    const handleSendStatus = async () => {
+        console.log("Sending status");
+        console.log("Device: ", device.ip, device.dns_url);
+        try {
+            let url;
+            if (device.ip)
+                url = `http://${device.ip}/msg`;
+            else
+                url = `http://${device.dns_url}/msg`;
+            console.log("URL to send status: ", url);
+            const response = await axios.post(url, {
+                "message": `STATUS\n`
+            });
+            console.log("Response from send status: ", response.data);
+        } catch (err) {
+            console.log(err);
+            return ;
+        }
+        setTimeout(async () => {
+            try {
+            let url;
+            if (device.ip)
+                url = `http://${device.ip}/buffer`;
+            else
+                url = `http://${device.dns_url}/buffer`;
+            const response = await axios.get(url);
+            console.log("Response from second request: ", response.data);
+            } catch (err) {
+            console.log(err);
+            }
+        }, 500);
+    }
+
+
     return (
         <div className='device-command' style={{gridRow: row, gridColumn: column}}>
             <div className='device-command-header'>
@@ -39,7 +111,7 @@ const DeviceCommands = ({row, column}) => {
                 <div className="device-command-row">
                     <label>Actaulizar información:</label>
                     <div/>
-                    <button className="btn">Actualizar</button>
+                    <button className="btn" onClick={handleSendStatus}>Actualizar</button>
                     <div></div>
                 </div>
                 <div className="device-command-row">
@@ -63,7 +135,7 @@ const DeviceCommands = ({row, column}) => {
                         type="text"
                         placeholder="Pasos por lectura"
                     />
-                    <button className="btn">Enviar</button>
+                    <button className="btn" onClick={handleSendSteps}>Enviar</button>
                     <div></div>
                 </div>
                 <div className="device-command-row">
