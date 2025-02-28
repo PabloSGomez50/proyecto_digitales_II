@@ -16,11 +16,12 @@ void init_vl53l1x(uint16_t dev, uint16_t mode) {
     // status = VL53L1_RdWord(dev, 0x010F, &wordData);
     // printf("VL53L1X: %X\n", wordData);
 
-    while(sensorState==0){
+    
+    status = VL53L1X_BootState(dev, &sensorState);
+    while(!sensorState){
       status = VL53L1X_BootState(dev, &sensorState);
       delay_mseg(200);
     }
-    printf("Chip booted\n");
 
     /* This function must to be called to initialize the sensor with the default setting  */
     status = VL53L1X_SensorInit(dev);
@@ -35,14 +36,11 @@ void init_vl53l1x(uint16_t dev, uint16_t mode) {
 
 laser_data_t get_data_laser(uint16_t dev) {
     uint8_t status;
-
-    laser_data_t data;
-    uint8_t error_count = 0;
+    laser_data_t data = {0};
     status = VL53L1X_CheckForDataReady(dev, &data.ready);
-    while (!data.ready && error_count < 20) {
-        status = VL53L1X_CheckForDataReady(dev, &data.ready);
-        error_count++;
-    }
+    if (data.ready == 0)
+        return data;
+    
     status = VL53L1X_GetRangeStatus(dev, &data.range);
     status = VL53L1X_GetDistance(dev, &data.distance);
     status = VL53L1X_GetSignalRate(dev, &data.signal_rate);

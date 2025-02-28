@@ -22,16 +22,15 @@
 void select_menu(menu_t * menu);
 void check_usart_ajustments();
 uint16_t get_mot_angle();
+
 uint8_t steps_per_read = 3;
 uint16_t max_steps = 0;
 uint16_t i_steps = 0;
 uint16_t mot_angle = 0;
 
-
 // Variables del as6500
-uint16_t magnetic_angle = 0;
-uint16_t last_magnetic_angle = 0;
-uint8_t diff_angle = 0;
+int16_t magnetic_angle = 0;
+int16_t last_magnetic_angle = 0;
 uint16_t magnetic_full_turns = 0;
 
 // Vars stepper
@@ -44,6 +43,7 @@ int main(void) {
     uint32_t frecuency = 12000000;
     uint8_t status;
     menu_t menu = m_idle;
+    uint32_t last_read_tick = 0;
 
     // Variables del vl53l1x
     laser_data_t lidar_data;
@@ -58,13 +58,12 @@ int main(void) {
     init_gpio();
     init_systick(1000);
     
-    init_bipolar_stepper(motor_dir);
-    // if(motor_stepper_mode) {
-    //   init_bipolar_stepper(motor_dir);
-    //   select_micro_steps(full_step);
-    // } else {
-    //   init_dc_motor();
-    // }
+    if(motor_stepper_mode) {
+      init_bipolar_stepper(motor_dir);
+      select_micro_steps(full_step);
+    } else {
+      init_dc_motor();
+    }
   
 
     if (TEST_STEPPER)
@@ -73,13 +72,14 @@ int main(void) {
     init_SWM_USART(USART_PORT, kSWM_PortPin_P0_17, kSWM_PortPin_P0_16);
     while (TEST_USART) {
       select_menu(&menu);
-      // sprintf(msg_usart, "Menu test\n");
-      // USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
       delay_mseg(100);
     }
+    init_adc();
     // SCL: 19  | SDA: 20
     init_i2c1(kSWM_PortPin_P0_19, kSWM_PortPin_P0_20, baud, frecuency);
+    LED_BLUE_ON();
     init_vl53l1x(dev, lidar_mode);
+    LED_BLUE_OFF();
 
     #if AS5600_ON
       init_as5600_dir();
@@ -91,24 +91,26 @@ int main(void) {
       last_magnetic_angle = mot_angle;
       if (USR_DEBUG)
         PRINTF("El valor del angulo es: %i\n", mot_angle);
-      // sprintf(msg_usart, "El valor del angulo es %i\r\n", mot_angle);
-      // USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
     }
 
     while(1) {
       if (strlen(buffer_usart) > 0) {
         check_buffer_restart();
         check_usart_ajustments();
-      }
-      
-      if (strlen(buffer_usart) > 0) {
         select_menu(&menu);
       }
 
       if (menu == m_active) {
         lidar_data = get_data_laser(dev);
         mot_angle = get_mot_angle();
-        send_laser_uart(lidar_data, USART_PORT, mot_angle);
+        if (lidar_data.ready != 0) {
+          send_laser_uart(lidar_data, USART_PORT, mot_angle);
+          LED_RED_OFF();
+          last_read_tick = flag_tick_main;
+        } else {
+          if (flag_tick_main - last_read_tick > 100)
+            LED_RED_ON();
+        }
         
         if (motor_stepper_mode && move_bipolar_steps(steps_per_read)) {
           if (USR_DEBUG)
@@ -120,17 +122,16 @@ int main(void) {
       {
         if(i_steps < max_steps) {
           lidar_data = get_data_laser(dev);
+          mot_angle = get_mot_angle();
+          if (lidar_data.ready != 0)
+            continue;
+
           send_laser_uart(lidar_data, USART_PORT, mot_angle / MOT_RATIO);
           
           if(motor_stepper_mode) {
             move_bipolar_steps(steps_per_read);
           }
-          mot_angle = get_mot_angle();
-          // mot_angle += MOT_ANGLE_PER_STEP * steps_per_read;
           i_steps += steps_per_read;
-          // make_bipolar_step();
-          // mot_angle += MOT_ANGLE_PER_STEP;
-          // i_steps ++;
         } else {
           menu = m_idle;
           if (motor_stepper_mode) {
@@ -150,15 +151,10 @@ uint16_t get_mot_angle() {
     
   if (refresh_magnet_status()) {
     magnetic_angle = get_angle_position() * 10 / MOT_RATIO;
-    // diff_angle = abs(magnetic_angle - last_magnetic_angle);
     
     if (abs(magnetic_angle - last_magnetic_angle) > 900) {
-      // diff_angle = abs(1800 - diff_angle);
       magnetic_full_turns++;
     }
-    // if (motor_dir == CCW)
-    //   magnetic_angle = 1800 - magnetic_angle;
-      
     last_magnetic_angle = magnetic_angle;
     return magnetic_full_turns * 1800 + magnetic_angle;
   }
@@ -210,7 +206,8 @@ void check_usart_ajustments() {
     return;
   }
   if (!strcmp("BATTERY", buffer_usart)) {
-    sprintf(msg_usart, "Battery level: %u\r\n", get_battery_level());
+    uint16_t battery_level = get_battery_level();
+    sprintf(msg_usart, "Battery level: %u,%u\r\n", battery_level / 100, battery_level % 100);
     USART_WriteBlocking(USART_PORT, msg_usart, strlen(msg_usart) - 1);
     reset_usart();
     return;
