@@ -43,14 +43,14 @@ const Sidebar = ( {
 
           )}
         </div>
-        <div className='sidebar-config'>
+        {/* <div className='sidebar-config'>
           <SidebarOption 
             Icon={FaGear}
             title='Configuración'
             selected={optionSelected}
             setSelected={setOptionSelected}
           />
-        </div>
+        </div> */}
       </aside>
     )
 }

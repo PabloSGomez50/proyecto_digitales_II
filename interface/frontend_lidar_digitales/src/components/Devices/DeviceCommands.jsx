@@ -9,6 +9,8 @@ const DeviceCommands = ({row, column}) => {
     const [motorMode, setMotorMode] = useState("STEPPER_MOTOR");
 
     const { device, updateDeviceData } = useDevice();
+    const [ inRequest, setInRequest ] = useState(false);
+    const DEFAULT_VALUE = false;
 
     const url_create = () => {
         if (device.ip)
@@ -19,6 +21,7 @@ const DeviceCommands = ({row, column}) => {
     }
 
     const handleSendStatus = async () => {
+        setInRequest(DEFAULT_VALUE);
         console.log("Sending status");
         console.log("Device: ", device.ip, device.dns_url);
         try {
@@ -31,6 +34,7 @@ const DeviceCommands = ({row, column}) => {
             // Format: "Status alive, steps: %d, mode: %d\r\n"
         } catch (err) {
             console.error(err);
+            setInRequest(false);
             return ;
         }
         setTimeout(async () => {
@@ -53,13 +57,16 @@ const DeviceCommands = ({row, column}) => {
                 mode: mode ? (parseInt(mode[1]) ? "Motor paso a paso" : "Motor de continua" ) : undefined
             }
             );
+            setInRequest(false);
             } catch (err) {
             console.error(err);
+            setInRequest(false);
             }
         }, 500);
     }
 
     const handlesendBattery = async () => {
+        setInRequest(DEFAULT_VALUE);
         console.log("Sending Battery");
         console.log("Device: ", device.ip, device.dns_url);
         try {
@@ -71,6 +78,7 @@ const DeviceCommands = ({row, column}) => {
             console.log("Response from query battery: ", response.data);
         } catch (err) {
             console.error(err);
+            setInRequest(false);
             return ;
         }
         setTimeout(async () => {
@@ -85,15 +93,17 @@ const DeviceCommands = ({row, column}) => {
             // "Battery level: %u,%u\r\n"
             const battery = response.data.buffer.match(/Battery level: (\d+),(\d+)/);
             if (battery) {
-                const battery_voltaje = parseFloat(`${battery[1]}.${battery[2]}`);
+                const battery_voltaje = Math.round((parseFloat(`${battery[1]}.${battery[2]}`) - 7.4) * 100);
                 console.log("Voltaje:", battery_voltaje);
                 updateDeviceData(device.id, {
                     ...device.data,
                     battery: battery_voltaje
                 });
-            }
+            } 
+            setInRequest(false);
             } catch (err) {
             console.error(err);
+            setInRequest(false);
             }
         }, 500);
     }
@@ -112,6 +122,7 @@ const DeviceCommands = ({row, column}) => {
     }
 
     const handleSendSteps = async () => {
+        setInRequest(DEFAULT_VALUE);
         console.log("Device: ", device.ip, device.dns_url);
         if (stepsPerRead === 0) {
             return;
@@ -125,6 +136,7 @@ const DeviceCommands = ({row, column}) => {
             console.log("Response from send steps: ", response.data);
         } catch (err) {
             console.error(err);
+            setInRequest(false);
             return ;
         }
         setTimeout(async () => {
@@ -144,13 +156,16 @@ const DeviceCommands = ({row, column}) => {
                     steps_per_read: parseInt(steps[1])
                 });
             }
+            setInRequest(false);
             } catch (err) {
             console.error(err);
+            setInRequest(false);
             }
         }, 500);
     }
 
     const handleSendMode = async () => {
+        setInRequest(DEFAULT_VALUE);
         try {
             const url = url_create();
             console.log("URL to send Mode: ", url);
@@ -160,6 +175,7 @@ const DeviceCommands = ({row, column}) => {
             console.log("Response from send mode: ", response.data);
         } catch (err) {
             console.error(err);
+            setInRequest(false);
             return ;
         }
         setTimeout(async () => {
@@ -186,13 +202,16 @@ const DeviceCommands = ({row, column}) => {
                     });
                 }
             }
+            setInRequest(false);
             } catch (err) {
             console.error(err);
+            setInRequest(false);
             }
         }, 500);
     }
 
     const handleSendReset = async () => {
+        setInRequest(DEFAULT_VALUE);
         try {
             const url = url_create();
             console.log("URL to send Reset: ", url);
@@ -202,6 +221,7 @@ const DeviceCommands = ({row, column}) => {
             console.log("Response from send reset: ", response.data);
         } catch (err) {
             console.error(err);
+            setInRequest(false);
             return ;
         }
         setTimeout(async () => {
@@ -221,13 +241,16 @@ const DeviceCommands = ({row, column}) => {
                     angle: 0
                 });
             }
+            setInRequest(false);
             } catch (err) {
             console.error(err);
+            setInRequest(false);
             }
         }, 500);
     }
 
     const handleSendAngle = async () => {
+        setInRequest(DEFAULT_VALUE);
         try {
             const url = url_create();
             console.log("URL to send Angle: ", url);
@@ -237,6 +260,7 @@ const DeviceCommands = ({row, column}) => {
             console.log("Response from send reset: ", response.data);
         } catch (err) {
             console.error(err);
+            setInRequest(false);
             return ;
         }
         setTimeout(async () => {
@@ -253,11 +277,13 @@ const DeviceCommands = ({row, column}) => {
             if (angle) {
                 updateDeviceData(device.id, {
                     ...device.data,
-                    angle: parseInt(angle[1]) / 10
+                    angle: Math.round(parseInt(angle[1]) / 10)
                 });
             }
+            setInRequest(false);
             } catch (err) {
             console.error(err);
+            setInRequest(false);
             }
         }, 500);
     }
@@ -278,21 +304,38 @@ const DeviceCommands = ({row, column}) => {
                 {device?.name ? (
                 <>
                     <div className="device-command-row">
-                        <label>Actaulizar información:</label>
+                        <label>Actualizar información:</label>
                         <div/>
-                        <button className="btn" onClick={handleSendStatus}>Actualizar</button>
+                        <button className="btn" onClick={handleSendStatus}
+                            disabled={inRequest}
+                        >Actualizar</button>
                         <div></div>
                     </div>
                     <div className="device-command-row">
                         <label>Nivel de bateria:</label>
                         <div/>
-                        <button className="btn" onClick={handlesendBattery}>Actualizar</button>
+                        <button className="btn" onClick={handlesendBattery}
+                            disabled={inRequest}
+                        >Actualizar</button>
                         <span>{device?.data?.battery ? device?.data?.battery + "%": "No disponible"}</span>
                     </div>
                     <div className="device-command-row">
                         <label>Angulo Actual:</label>
-                        <button className="btn" onClick={handleSendReset}>Reiniciar</button>
-                        <button className="btn" onClick={handleSendAngle}>Actualizar</button>
+                        <div></div>
+                        {/* <button
+                        className="btn"
+                        onClick={handleSendReset}
+                        disabled={inRequest}
+                        >
+                            Reiniciar
+                        </button> */}
+                        <button
+                        className="btn"
+                        onClick={handleSendAngle}
+                        disabled={inRequest}
+                        >
+                            Actualizar
+                        </button>
                         <span>{device?.data?.angle !== undefined ? (device.data.angle % 360) + "°": "No disponible"}</span>
                     </div>
                     <div className="device-command-row">
@@ -304,7 +347,11 @@ const DeviceCommands = ({row, column}) => {
                             type="text"
                             placeholder="Pasos por lectura"
                         />
-                        <button className="btn" onClick={handleSendSteps}>Enviar</button>
+                        <button
+                            className="btn"
+                            onClick={handleSendSteps}
+                            disabled={inRequest}
+                        >Enviar</button>
                         <div></div>
                     </div>
                     <div className="device-command-row">
@@ -320,6 +367,7 @@ const DeviceCommands = ({row, column}) => {
                         <button
                             className="btn"
                             onClick={handleSendMode}
+                            disabled={inRequest}
                         >Enviar</button>
                         <div></div>
                     </div>

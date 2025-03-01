@@ -5,17 +5,19 @@ import axios from 'axios';
 const IP_REGEX = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/;
 const DeviceContext = createContext();
 
+const default_points = {
+  "distance": [20, 25, 45, 80, 80, 80, 40],
+  "mot_angle": [0, 0, 450, 900, 1350, 1800, 2250],
+}
+
 export const useDevice = () => useContext(DeviceContext);
 
 export const DeviceProvider = ({ children }) => {
   const [device, setDevice] = useState({}); // user can be null, or user data
   const [devices, setDevices] = useState([
     {id: 1, name: 'Lidar TDII AP', dns_url: 'lidar.local', 
-      ip: undefined, data: {active: false}, 
-      points: {
-        "distance": [20, 25, 45, 80, 80, 80, 40],
-        "mot_angle": [0, 0, 450, 900, 1350, 1800, 2250],
-      }
+      ip: undefined, data: {active: false, point_count: 0}, 
+      points: {}
     },
   ]);
   // const navigate = useNavigate();

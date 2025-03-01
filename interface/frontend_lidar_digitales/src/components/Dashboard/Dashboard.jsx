@@ -88,15 +88,15 @@ const Dashboard = () => {
                     row={1}
                     column={2}
                 />
-                <DataChip
+                <DataChip 
                     Icon={FaPlus}
-                    data={{name: 'Puntos Guardados', value: device?.points?.distance?.length, default: 0}}
+                    data={{name: 'Puntos Guardados', value: device?.data?.point_count, default: 0}}
                     row={2}
                     column={1}
                 />
                 <DataChip
                     Icon={FaPlus}
-                    data={{name: 'Vueltas completadas', value: Math.trunc(device?.data?.angle / 360), default: 0}}
+                    data={{name: 'Vueltas completadas', value: device?.data?.mot_lap, default: 0}}
                     row={2}
                     column={2}
                 />

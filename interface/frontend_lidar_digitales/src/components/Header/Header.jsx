@@ -77,13 +77,14 @@ const Header = () => {
           </ul> 
         </div>
         <div className='header-content'>
-            <button 
+            <div></div>
+            {/* <button 
                 className='header-new-duel flex'
                 onClick={() => setShowModal(true)}
             >
                 <FaPlus className='icon' />
                 <span>Nuevo Dispositivo</span>
-            </button>
+            </button> */}
             {/* <div className='searchbar flex'>
                 <FaSearch  className='icon'/>
                 <input type="text" name="search" />

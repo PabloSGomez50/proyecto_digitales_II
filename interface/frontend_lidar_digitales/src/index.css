@@ -196,6 +196,11 @@ select:active, select:focus{
   color: white;
 }
 
+.btn:disabled {
+  background-color: var(--gray-400);
+  color: white;
+}
+
 input[type="text"],input[type="number"] {
   border: none;
   outline: none;

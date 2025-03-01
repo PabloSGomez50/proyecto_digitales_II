@@ -16,7 +16,7 @@ const DataProgression = ({ data, row, column }) => {
     //     "mot_angle": [0, 0, 450, 900, 1350, 1800, 2250],
     //   }
 
-    const { device, getDeviceUrl } = useDevice();
+    const { device, getDeviceUrl, updateDeviceData } = useDevice();
 
     useEffect(() => {
         setPoints(device?.points || {"distance": [], "mot_angle": []});
@@ -95,12 +95,19 @@ const DataProgression = ({ data, row, column }) => {
             const url = `${getDeviceUrl()}/sensor`;
             console.log("URL to request sensor data: ", url);
             const response = await axios.get(url);
-            // console.log("Response: ", response.data);
+            
             if (response.data?.distance && response.data?.mot_angle) {
                 setPoints(prev => ({
                     "distance": prev?.distance ? prev.distance.concat(response.data.distance) : response.data.distance,
                     "mot_angle": prev?.mot_angle ? prev.mot_angle.concat(response.data.mot_angle) : response.data.mot_angle
                 }));
+            }
+            if (response.data?.mot_lap) {
+                const last_lap = response.data.mot_lap[response.data.mot_lap.length - 1];
+                updateDeviceData(device.id, {...device.data, "mot_lap": last_lap,
+                // "point_count": device.data.point_count + response.data.distance.length
+                });
+                
             }
 
         } catch (err) {
@@ -111,11 +118,6 @@ const DataProgression = ({ data, row, column }) => {
     }
 
     useEffect(() => {
-        // if (status === "Enviando...") {
-        //     setTimeout(() => {
-        //         setStatus(undefined);
-        //     }, 1000);
-        // }
         if (status === "Activo") {
             interval_ref.current = setInterval(requestData, 1000);
         }
@@ -152,19 +154,29 @@ const DataProgression = ({ data, row, column }) => {
             mode: 'markers',
             type: 'scatterpolar'
         };
+        const max_limit = distance.length === 0 ? 100 : Math.min(Math.max(...distance) + 20, 1000);
 
         const layout = {
             polar: {
-                radialaxis: {
-                    visible: true,
-                    range: [0, Math.max(...distance) + 20]
+            radialaxis: {
+                visible: true,
+                range: [0, max_limit],
+                title: {
+                    text: '[mm]'
                 }
+            }
             },
-            showlegend: false
+            showlegend: false,
+            
         };
 
         Plotly.newPlot(graphRef.current, [trace], layout);
     }, [points]);
+
+    const deleteValues = () => {
+        setPoints({"distance": [], "mot_angle": []});
+        updateDeviceData(device.id, {...device.data, point_count: 0})
+    }
 
     return (
         <div className='data-progression flex-col' style={{gridRow: row, gridColumn: column}}>
@@ -174,7 +186,7 @@ const DataProgression = ({ data, row, column }) => {
             <div className='data-progression-body'>
                 <div ref={graphRef}></div>
                 <div className="data-progression-options flex gap-1">
-                    <button className="btn" onClick={() => setPoints({"distance": [], "mot_angle": []})}>
+                    <button className="btn" onClick={deleteValues}>
                         <span>Eliminar contenido</span>
                         {/* <i className="fas fa-download"></i> */}
                     </button>
